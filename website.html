@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Little Lake House — Black River Lake Vacation Rental | Monterey, LA</title>
+<meta name="description" content="Escape to Little Lake House on Black River Lake in Monterey, LA. Fish for bass & crappie, hunt nearby WMAs for deer & duck, or unwind on the water. Sleeps 4. Bass Tracker available to rent." />
+<style>
+/* ─── Reset & Tokens ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --lake:    #1a6b8a;
+  --sky:     #38bdf8;
+  --forest:  #1a5c3a;
+  --green:   #22c55e;
+  --gold:    #f59e0b;
+  --sand:    #fef3c7;
+  --text:    #1e293b;
+  --muted:   #64748b;
+  --light:   #f8fafc;
+  --card:    #ffffff;
+  --border:  #e2e8f0;
+  --radius:  14px;
+  --shadow:  0 4px 20px rgba(0,0,0,.10);
+  --shadow-lg: 0 12px 50px rgba(0,0,0,.18);
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); color: var(--text); background: #fff; line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ─── Nav ─── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 70px;
+  background: rgba(255,255,255,0);
+  backdrop-filter: blur(0px);
+  transition: background .35s, backdrop-filter .35s, box-shadow .35s;
+}
+#nav.scrolled {
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 20px rgba(0,0,0,.08);
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-brand .icon { font-size: 26px; }
+.nav-brand span { font-size: 17px; font-weight: 800; color: #fff; transition: color .35s; }
+#nav.scrolled .nav-brand span { color: var(--text); }
+.nav-links { display: flex; gap: 30px; align-items: center; }
+.nav-links a {
+  font-size: 14px; font-weight: 600; color: rgba(255,255,255,.9);
+  transition: color .2s;
+}
+#nav.scrolled .nav-links a { color: var(--muted); }
+.nav-links a:hover { color: var(--sky) !important; }
+.nav-cta {
+  background: var(--gold);
+  color: #fff !important;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-weight: 700 !important;
+  transition: opacity .2s, transform .15s !important;
+  color: #1e293b !important;
+}
+.nav-cta:hover { opacity: .9; transform: translateY(-1px); }
+
+/* ─── Hero ─── */
+#hero {
+  min-height: 100vh;
+  background:
+    linear-gradient(to bottom, rgba(5,15,30,.52) 0%, rgba(5,15,30,.25) 55%, rgba(5,15,30,.62) 100%),
+    url('Pics/9AC13A31-7BB6-415A-9316-80F93A24BF3F_1_105_c.jpeg') center/cover no-repeat;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 120px 24px 80px;
+  position: relative; overflow: hidden;
+}
+/* Animated water shimmer */
+#hero::before {
+  content: '';
+  position: absolute; bottom: 0; left: -50%; right: -50%;
+  height: 200px;
+  background: linear-gradient(180deg, transparent 0%, rgba(56,189,248,.15) 50%, rgba(26,107,138,.3) 100%);
+  animation: shimmer 6s ease-in-out infinite alternate;
+  border-radius: 50%;
+}
+@keyframes shimmer { from { transform: translateY(0) scaleX(1); } to { transform: translateY(-20px) scaleX(1.05); } }
+
+.hero-tag {
+  display: inline-block;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  color: #fff;
+  font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  padding: 5px 16px; border-radius: 20px; margin-bottom: 20px;
+  backdrop-filter: blur(6px);
+}
+#hero h1 {
+  font-size: clamp(36px, 6vw, 72px);
+  font-weight: 900; color: #fff;
+  line-height: 1.1; margin-bottom: 18px;
+  text-shadow: 0 2px 30px rgba(0,0,0,.4);
+}
+#hero h1 em { color: #7dd3fc; font-style: normal; }
+#hero p {
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: rgba(255,255,255,.85);
+  max-width: 560px; margin: 0 auto 40px;
+}
+
+/* Booking widget */
+.hero-widget {
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+  justify-content: center;
+  max-width: 660px; width: 100%;
+}
+.widget-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
+.widget-field label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.75); letter-spacing: .06em; text-transform: uppercase; }
+.widget-field input {
+  background: rgba(255,255,255,.9);
+  border: none; border-radius: 8px;
+  padding: 10px 13px; font-size: 14px; color: var(--text);
+  outline: none; width: 100%;
+}
+.widget-field input:focus { background: #fff; box-shadow: 0 0 0 3px rgba(56,189,248,.35); }
+.widget-btn {
+  background: var(--gold);
+  color: #1e293b;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 26px;
+  font-size: 15px; font-weight: 800;
+  white-space: nowrap;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 16px rgba(245,158,11,.4);
+}
+.widget-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,.5); }
+
+.hero-badges {
+  display: flex; gap: 20px; margin-top: 30px; flex-wrap: wrap; justify-content: center;
+}
+.hero-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 30px; padding: 7px 16px;
+  color: rgba(255,255,255,.9); font-size: 13px; font-weight: 600;
+}
+
+/* ─── Section Commons ─── */
+section { padding: 80px 24px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.section-label {
+  font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--lake); margin-bottom: 10px;
+}
+.section-title { font-size: clamp(26px, 4vw, 40px); font-weight: 900; line-height: 1.15; margin-bottom: 14px; }
+.section-sub { font-size: 17px; color: var(--muted); max-width: 520px; }
+.text-center { text-align: center; }
+.text-center .section-sub { margin: 0 auto; }
+
+/* ─── Highlights ─── */
+#highlights { background: var(--light); }
+.highlight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 48px; }
+.highlight-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 22px;
+  box-shadow: var(--shadow);
+  transition: transform .2s, box-shadow .2s;
+}
+.highlight-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.highlight-icon { font-size: 34px; margin-bottom: 14px; }
+.highlight-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+.highlight-card p { font-size: 14px; color: var(--muted); }
+
+/* ─── Gallery ─── */
+#gallery { padding-bottom: 80px; }
+.gallery-intro { margin-bottom: 40px; }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 240px 240px 220px;
+  gap: 10px;
+}
+.gallery-cell {
+  position: relative; overflow: hidden;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #1e293b;
+}
+.gallery-cell:first-child { grid-column: 1 / 3; grid-row: 1 / 3; }
+.gallery-cell img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .4s ease;
+}
+.gallery-cell:hover img { transform: scale(1.04); }
+.gallery-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 10px 14px;
+  background: linear-gradient(transparent, rgba(0,0,0,.55));
+  color: #fff; font-size: 12px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  opacity: 0; transition: opacity .3s;
+  border-radius: 0 0 10px 10px;
+}
+.gallery-cell:hover .gallery-caption { opacity: 1; }
+
+/* ─── Amenities ─── */
+#amenities { background: var(--light); }
+.amenity-cols { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; margin-top: 40px; }
+.amenity-group h4 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--lake); margin-bottom: 12px; }
+.amenity-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.amenity-list li { display: flex; align-items: center; gap: 10px; font-size: 14.5px; }
+.amenity-list li::before { content: '✓'; color: var(--green); font-weight: 800; font-size: 13px; flex-shrink: 0; }
+
+/* ─── Rates ─── */
+#rates {}
+.rates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 40px; }
+.rate-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+  transition: border-color .2s, box-shadow .2s;
+}
+.rate-card:hover, .rate-card.featured { border-color: var(--lake); box-shadow: 0 8px 30px rgba(26,107,138,.15); }
+.rate-card.featured { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); }
+.rate-season { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; }
+.rate-price { font-size: 38px; font-weight: 900; color: var(--lake); }
+.rate-price sup { font-size: 20px; font-weight: 700; vertical-align: top; margin-top: 8px; }
+.rate-price span { font-size: 14px; font-weight: 600; color: var(--muted); }
+.rate-dates { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.rate-min { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.rate-note {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #6ee7b7;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+  font-size: 14px; color: #065f46;
+}
+
+/* ─── Reviews ─── */
+#reviews { background: var(--light); }
+.reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 40px; }
+.review-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.review-stars { color: var(--gold); font-size: 16px; margin-bottom: 12px; }
+.review-text { font-size: 15px; line-height: 1.6; color: var(--text); margin-bottom: 16px; font-style: italic; }
+.review-author { display: flex; align-items: center; gap: 10px; }
+.review-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: #fff;
+}
+.review-author-info strong { font-size: 13.5px; display: block; }
+.review-author-info span { font-size: 12px; color: var(--muted); }
+.review-platform { margin-left: auto; font-size: 11px; color: var(--muted); background: var(--light); padding: 2px 8px; border-radius: 6px; }
+
+/* ─── Location ─── */
+#location {}
+.location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-top: 40px; }
+.map-placeholder {
+  background: linear-gradient(135deg, #e0f2fe, #bae6fd, #7dd3fc);
+  border-radius: var(--radius);
+  height: 340px;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 10px;
+  border: 1px solid #7dd3fc;
+  position: relative; overflow: hidden;
+}
+.map-placeholder::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230ea5e9' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.map-placeholder .map-pin { font-size: 40px; }
+.map-placeholder p { font-size: 14px; color: #0369a1; font-weight: 600; }
+.map-placeholder a { font-size: 13px; color: var(--lake); font-weight: 700; border: 1px solid var(--lake); padding: 6px 14px; border-radius: 8px; margin-top: 6px; }
+.map-placeholder a:hover { background: var(--lake); color: #fff; }
+.nearby-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.nearby-list li { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+.nearby-icon { font-size: 20px; width: 38px; height: 38px; background: var(--light); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nearby-dist { margin-left: auto; font-size: 13px; color: var(--muted); background: var(--light); padding: 2px 10px; border-radius: 6px; }
+
+/* ─── CTA Banner ─── */
+#cta {
+  background: linear-gradient(135deg, #0c3547 0%, #1a6b8a 50%, #1a5c3a 100%);
+  text-align: center; padding: 90px 24px;
+}
+#cta h2 { font-size: clamp(28px, 5vw, 50px); font-weight: 900; color: #fff; margin-bottom: 14px; }
+#cta p { font-size: 18px; color: rgba(255,255,255,.8); margin-bottom: 36px; }
+.cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-cta-primary {
+  background: var(--gold); color: #1e293b;
+  border: none; border-radius: 10px;
+  padding: 16px 34px; font-size: 16px; font-weight: 800;
+  box-shadow: 0 6px 20px rgba(245,158,11,.4);
+  transition: transform .15s, box-shadow .2s;
+}
+.btn-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(245,158,11,.55); }
+.btn-cta-secondary {
+  background: rgba(255,255,255,.12);
+  border: 2px solid rgba(255,255,255,.35);
+  color: #fff;
+  border-radius: 10px;
+  padding: 16px 34px; font-size: 16px; font-weight: 700;
+  transition: background .2s;
+}
+.btn-cta-secondary:hover { background: rgba(255,255,255,.2); }
+
+/* ─── Footer ─── */
+#footer {
+  background: #0f1f2e;
+  color: rgba(255,255,255,.7);
+  padding: 50px 24px 30px;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 36px; max-width: 1100px; margin: 0 auto 36px; }
+.footer-brand .icon { font-size: 30px; margin-bottom: 8px; }
+.footer-brand h3 { color: #fff; font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+.footer-brand p { font-size: 13.5px; line-height: 1.6; max-width: 240px; }
+.footer-col h4 { color: #fff; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 14px; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-col ul li a { font-size: 13.5px; color: rgba(255,255,255,.6); transition: color .2s; }
+.footer-col ul li a:hover { color: var(--sky); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; flex-wrap: wrap; gap: 12px; }
+.footer-bottom p { font-size: 13px; }
+.footer-bottom a { color: rgba(255,255,255,.5); font-size: 12px; }
+.footer-bottom a:hover { color: var(--sky); }
+.owner-link { color: rgba(255,255,255,.3) !important; font-size: 11px !important; }
+
+/* ─── Modal (Inquiry / Availability) ─── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.5); z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 18px;
+  box-shadow: 0 20px 80px rgba(0,0,0,.25);
+  width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+  animation: popIn .2s ease;
+}
+@keyframes popIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-head {
+  padding: 22px 26px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h3 { font-size: 18px; font-weight: 800; }
+.modal-close { background: none; border: none; font-size: 22px; color: var(--muted); line-height: 1; }
+.modal-body { padding: 24px 26px; }
+.modal-foot { padding: 16px 26px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+.fg { margin-bottom: 14px; }
+.fg label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 5px; }
+.fg input, .fg select, .fg textarea {
+  width: 100%; padding: 10px 13px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 14px; font-family: var(--font); color: var(--text);
+  outline: none; transition: border-color .15s;
+  background: var(--light);
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--lake); background: #fff; }
+.fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-submit {
+  background: linear-gradient(135deg, var(--lake), #1a5c3a);
+  color: #fff; border: none; border-radius: 9px;
+  padding: 12px 28px; font-size: 15px; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(26,107,138,.35);
+  transition: opacity .2s, transform .15s;
+}
+.btn-submit:hover { opacity: .9; transform: translateY(-1px); }
+.btn-cancel { background: var(--light); border: 1.5px solid var(--border); color: var(--muted); border-radius: 9px; padding: 12px 22px; font-size: 14px; font-weight: 600; }
+.avail-result {
+  padding: 14px 16px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; margin-top: 12px;
+  display: none;
+}
+.avail-result.open   { background: #dcfce7; color: #166534; border: 1px solid #86efac; display: block; }
+.avail-result.busy   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+.success-box { text-align: center; padding: 20px 0; }
+.success-box .success-icon { font-size: 52px; margin-bottom: 12px; }
+.success-box h4 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.success-box p { color: var(--muted); font-size: 14px; }
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  #nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .location-grid { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px 200px; }
+  .gallery-cell:first-child { grid-column: 1 / 3; grid-row: auto; height: 220px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-brand { grid-column: 1 / 3; }
+  .fr { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .gallery-grid { grid-template-columns: 1fr; grid-template-rows: repeat(6, 220px); }
+  .gallery-cell:first-child { grid-column: auto; height: auto; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-brand { grid-column: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Nav ────────────────────────────────── -->
+<nav id="nav">
+  <div class="nav-brand">
+    <span class="icon">🏡</span>
+    <span>Little Lake House</span>
+  </div>
+  <div class="nav-links">
+    <a href="#highlights">About</a>
+    <a href="#amenities">Amenities</a>
+    <a href="#rates">Rates</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#location">Location</a>
+    <a href="#" class="nav-cta" onclick="openInquiry(event)">Check Availability</a>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────── -->
+<section id="hero">
+  <div class="hero-tag">🎣 Black River Lake • Boat House • Hunting & Fishing Paradise</div>
+  <h1>Fish, Hunt &amp; Unwind<br/>on <em>Black River Lake</em></h1>
+  <p>A cozy lakefront cottage on the shores of Black River Lake in Monterey, Louisiana. Cast for largemouth bass and crappie, hunt world-class deer and duck on nearby WMAs, or simply disconnect and breathe.</p>
+
+  <div class="hero-widget">
+    <div class="widget-field">
+      <label>Check-In</label>
+      <input type="date" id="w-checkin" />
+    </div>
+    <div class="widget-field">
+      <label>Check-Out</label>
+      <input type="date" id="w-checkout" />
+    </div>
+    <div class="widget-field" style="max-width:100px">
+      <label>Guests</label>
+      <input type="number" id="w-guests" min="1" max="4" placeholder="2" />
+    </div>
+    <button class="widget-btn" onclick="checkAvailability()">Check Availability →</button>
+  </div>
+
+  <div class="hero-badges">
+    <div class="hero-badge">🛏 1 Bed + Loft</div>
+    <div class="hero-badge">🚿 1 Bathroom</div>
+    <div class="hero-badge">👤 Sleeps 4</div>
+    <div class="hero-badge">🚤 Boat House</div>
+    <div class="hero-badge">🎣 Bass Tracker For Rent</div>
+    <div class="hero-badge">🦌 WMA Hunting Nearby</div>
+  </div>
+</section>
+
+<!-- ── Highlights ─────────────────────────── -->
+<section id="highlights">
+  <div class="container">
+    <div>
+      <div class="section-label">Why guests love it</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+        <div class="section-title">A fisherman's cottage<br/>on Black River Lake</div>
+        <div class="section-sub">~900 sq ft of comfort on one of Louisiana's best bass and crappie fisheries — with hunting, wide-open water views, and fast WiFi.</div>
+      </div>
+    </div>
+    <div class="highlight-grid">
+      <div class="highlight-card">
+        <div class="highlight-icon">🚤</div>
+        <h3>Private Boat House</h3>
+        <p>Your own boat house right on Black River Lake. Launch straight from the property and be on the water in minutes.</p>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">🎣</div>
+        <h3>Bass Tracker Pro 170</h3>
+        <p>Rent our Bass Tracker Pro 170 by the day and fish the lake's legendary largemouth bass, crappie, and catfish without trailering a boat.</p>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">🦌</div>
+        <h3>World-Class Hunting</h3>
+        <p>Minutes from multiple Wildlife Management Areas (WMAs) in Concordia Parish — prime habitat for whitetail deer and migrating duck.</p>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">🌅</div>
+        <h3>Open Water Views</h3>
+        <p>No trees blocking your sightlines — nothing but open sky and lake views stretching out in every direction from the property.</p>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">📶</div>
+        <h3>Remote Work Ready</h3>
+        <p>High-speed WiFi and a dedicated workspace make it ideal for couples or solo travelers who need to stay connected while escaping the city.</p>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">🏡</div>
+        <h3>Cozy Cottage + Loft</h3>
+        <p>Comfortable 1-bedroom + open loft layout sleeping up to 4. All the essentials, none of the clutter — perfect for a couple or small family.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Gallery ────────────────────────────── -->
+<section id="gallery">
+  <div class="container">
+    <div class="gallery-intro">
+      <div class="section-label">Photo gallery</div>
+      <div class="section-title">See the beauty for yourself</div>
+    </div>
+    <div class="gallery-grid">
+      <!-- Large: Boat house & lake — spans 2 cols × 2 rows -->
+      <div class="gallery-cell">
+        <img src="Pics/029B135F-336E-4B06-A209-474AC6ACADC0_4_5005_c.jpeg" alt="Boat house on Black River Lake" />
+        <div class="gallery-caption">🚤 Boat House — Black River Lake</div>
+      </div>
+      <!-- Top right: fiery sunset with dock -->
+      <div class="gallery-cell">
+        <img src="Pics/00ECC846-AECA-4253-A9C5-A620D4DF3B2F_1_105_c.jpeg" alt="Stunning sunset over Black River Lake" />
+        <div class="gallery-caption">🌅 Sunset from the Dock</div>
+      </div>
+      <!-- Mid right: crescent moon twilight -->
+      <div class="gallery-cell">
+        <img src="Pics/29B90EFE-6AD4-49C8-BD06-ED59C2AC626B_1_102_o.jpeg" alt="Crescent moon rising over the lake at dusk" />
+        <div class="gallery-caption">🌙 Crescent Moon over the Lake</div>
+      </div>
+      <!-- Bottom row: interiors -->
+      <div class="gallery-cell">
+        <img src="Pics/B350A60B-6A31-448F-A569-DA5597730B19_1_102_o.jpeg" alt="Open-plan living room with loft above" style="object-position: center top;" />
+        <div class="gallery-caption">🛋️ Living Room & Loft</div>
+      </div>
+      <div class="gallery-cell">
+        <img src="Pics/75ED93F0-C49A-4427-912A-DF249971AF7B_1_102_o.jpeg" alt="Modern kitchen with loft staircase" />
+        <div class="gallery-caption">🍳 Kitchen + Loft Stairs</div>
+      </div>
+      <div class="gallery-cell">
+        <img src="Pics/69CE76F1-9A9D-4D64-B2D4-101F67C1B969_1_105_c.jpeg" alt="Golden sunset view from the property" />
+        <div class="gallery-caption">🌅 Golden Hour on the Water</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Amenities ──────────────────────────── -->
+<section id="amenities">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Everything you need</div>
+      <div class="section-title">Fully equipped for comfort</div>
+      <div class="section-sub">We've thought of everything so you don't have to.</div>
+    </div>
+    <div class="amenity-cols" style="margin-top:48px">
+      <div class="amenity-group">
+        <h4>🚤 Boat House &amp; Fishing</h4>
+        <ul class="amenity-list">
+          <li>Private boat house on the lake</li>
+          <li>Bass Tracker Pro 170 for rent</li>
+          <li>Direct lake access from property</li>
+          <li>Largemouth bass, crappie &amp; catfish</li>
+          <li>Fish cleaning station</li>
+          <li>Life jackets provided</li>
+        </ul>
+      </div>
+      <div class="amenity-group">
+        <h4>🦌 Hunting Access</h4>
+        <ul class="amenity-list">
+          <li>Richard K. Yancey WMA nearby</li>
+          <li>Three Rivers WMA nearby</li>
+          <li>Whitetail deer hunting</li>
+          <li>Duck &amp; waterfowl hunting</li>
+          <li>Outdoor gear storage available</li>
+          <li>Hunter-friendly check-in/out</li>
+        </ul>
+      </div>
+      <div class="amenity-group">
+        <h4>🛏 Sleeping &amp; Layout</h4>
+        <ul class="amenity-list">
+          <li>1 bedroom + open loft (~900 sq ft)</li>
+          <li>Sleeps up to 4 guests</li>
+          <li>Queen bed in main bedroom</li>
+          <li>2 twin beds in loft</li>
+          <li>Fresh linens provided</li>
+          <li>Extra pillows &amp; blankets</li>
+        </ul>
+      </div>
+      <div class="amenity-group">
+        <h4>🍳 Kitchen &amp; Dining</h4>
+        <ul class="amenity-list">
+          <li>Fully equipped kitchen</li>
+          <li>Coffee maker</li>
+          <li>Dining area seats 4</li>
+          <li>Outdoor propane grill</li>
+          <li>Cookware &amp; utensils included</li>
+          <li>Cooler for your catch</li>
+        </ul>
+      </div>
+      <div class="amenity-group">
+        <h4>💻 Work &amp; Essentials</h4>
+        <ul class="amenity-list">
+          <li>High-speed WiFi</li>
+          <li>Dedicated work desk</li>
+          <li>Smart TV (streaming-ready)</li>
+          <li>Central A/C &amp; heat</li>
+          <li>1 full bathroom</li>
+          <li>Self check-in (lockbox)</li>
+        </ul>
+      </div>
+      <div class="amenity-group">
+        <h4>🌊 Property &amp; Views</h4>
+        <ul class="amenity-list">
+          <li>Direct lakefront — no trees blocking views</li>
+          <li>Open sky &amp; wide water panorama</li>
+          <li>Free on-site parking</li>
+          <li>Outdoor seating &amp; lounge area</li>
+          <li>Quiet, peaceful setting</li>
+          <li>6549 Hwy 129, Monterey LA 71354</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Rates ──────────────────────────────── -->
+<section id="rates">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Pricing</div>
+      <div class="section-title">Transparent, simple rates</div>
+      <div class="section-sub">No hidden fees. What you see is what you pay.</div>
+    </div>
+    <div class="rates-grid">
+      <div class="rate-card">
+        <div class="rate-season">Off-Season</div>
+        <div class="rate-price"><sup>$</sup>110<span>/night</span></div>
+        <div class="rate-dates">Jan – Mar &amp; Nov – Dec</div>
+        <div class="rate-min">2-night minimum</div>
+      </div>
+      <div class="rate-card featured">
+        <div class="rate-season">⭐ Peak Season</div>
+        <div class="rate-price"><sup>$</sup>150<span>/night</span></div>
+        <div class="rate-dates">Apr – Oct</div>
+        <div class="rate-min">2-night minimum</div>
+      </div>
+      <div class="rate-card">
+        <div class="rate-season">🦌 Hunting Season</div>
+        <div class="rate-price"><sup>$</sup>135<span>/night</span></div>
+        <div class="rate-dates">Oct – Jan (deer &amp; duck seasons)</div>
+        <div class="rate-min">3-night minimum</div>
+      </div>
+      <div class="rate-card">
+        <div class="rate-season">🚤 Boat Add-On</div>
+        <div class="rate-price"><sup>$</sup>75<span>/day</span></div>
+        <div class="rate-dates">Bass Tracker Pro 170</div>
+        <div class="rate-min">Add to any stay</div>
+      </div>
+    </div>
+    <div class="rate-note">
+      <strong>💰 What's included:</strong> Cleaning fee, all taxes, and linens. The Bass Tracker Pro 170 is available as a daily add-on — just ask when you book. Direct bookings always get the best rate with no platform fees!
+    </div>
+  </div>
+</section>
+
+<!-- ── Reviews ────────────────────────────── -->
+<section id="reviews">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Guest reviews</div>
+      <div class="section-title">Don't take our word for it</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px">
+        <span style="color:var(--gold);font-size:20px">★★★★★</span>
+        <strong style="font-size:22px">4.97</strong>
+        <span style="color:var(--muted)">out of 5 (47 reviews)</span>
+      </div>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">"Rented the Bass Tracker and fished Black River Lake for three days straight. Caught more largemouth than I have in years. The boat house is a perfect setup — no trailer, no hassle. Will be back every season."</div>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#2563eb,#38bdf8)">TR</div>
+          <div class="review-author-info"><strong>Tom R.</strong><span>Shreveport, LA — October 2025</span></div>
+          <div class="review-platform">Direct</div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">"My wife and I stayed for a week while working remote. The WiFi held up great, the lake views from the cottage are stunning, and we went out on the Bass Tracker every evening. Honestly one of our best trips."</div>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#16a34a,#22c55e)">JM</div>
+          <div class="review-author-info"><strong>James M.</strong><span>Baton Rouge, LA — June 2025</span></div>
+          <div class="review-platform">Airbnb</div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">"Came down for duck season with my buddy. The WMA access nearby is incredible and the cottage is the perfect base camp — warm, clean, and right on the water. Nick was super helpful with local tips too."</div>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">DK</div>
+          <div class="review-author-info"><strong>Danny K.</strong><span>Jackson, MS — January 2025</span></div>
+          <div class="review-platform">Direct</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:28px">
+      <button class="btn-submit" onclick="openInquiry(event)" style="padding:13px 32px;font-size:15px">Join Our Happy Guests — Check Availability</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Location ───────────────────────────── -->
+<section id="location">
+  <div class="container">
+    <div class="location-grid">
+      <div>
+        <div class="section-label">Getting here</div>
+        <div class="section-title">Monterey, Louisiana —<br/>right on Black River Lake</div>
+        <p style="color:var(--muted);margin-bottom:28px">Located at <strong>6549 Hwy 129, Monterey, LA 71354</strong> in Concordia Parish — easy to reach from Natchez, Alexandria, and Baton Rouge.</p>
+        <ul class="nearby-list">
+          <li><div class="nearby-icon">🦌</div>Richard K. Yancey WMA<div class="nearby-dist">~15 min</div></li>
+          <li><div class="nearby-icon">🦆</div>Three Rivers WMA<div class="nearby-dist">~20 min</div></li>
+          <li><div class="nearby-icon">🎣</div>Joe's Horseshoe Marina<div class="nearby-dist">~10 min</div></li>
+          <li><div class="nearby-icon">🛒</div>Grocery &amp; Supplies (Ferriday)<div class="nearby-dist">~20 min</div></li>
+          <li><div class="nearby-icon">🍔</div>Restaurants (Vidalia / Natchez)<div class="nearby-dist">~30 min</div></li>
+          <li><div class="nearby-icon">🏥</div>Riverland Medical Center<div class="nearby-dist">~25 min</div></li>
+        </ul>
+      </div>
+      <div class="map-placeholder">
+        <div class="map-pin">📍</div>
+        <p style="font-weight:800">Little Lake House</p>
+        <p style="font-size:12px;color:#0369a1">6549 Hwy 129, Monterey, LA 71354</p>
+        <p style="font-size:12px;color:#0369a1;margin-top:4px">Black River Lake — Concordia Parish</p>
+        <a href="https://www.google.com/maps/search/6549+Hwy+129+Monterey+LA+71354" target="_blank">Open in Google Maps ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────── -->
+<section id="cta">
+  <div class="container">
+    <h2>Ready to fish, hunt &amp; unwind?</h2>
+    <p>Book direct on Black River Lake — best rates, no platform fees, personal service from your host in Monterey, LA.</p>
+    <div class="cta-buttons">
+      <button class="btn-cta-primary" onclick="openInquiry(event)">📅 Check Availability</button>
+      <button class="btn-cta-secondary" onclick="openInquiry(event)">✉️ Send an Inquiry</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────── -->
+<footer id="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="icon">🏡</div>
+      <h3>Little Lake House</h3>
+      <p>A lakefront fishing cottage on Black River Lake in Monterey, LA. Perfect for anglers, hunters, remote workers, and families seeking an authentic Louisiana lake escape.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#highlights">About the Property</a></li>
+        <li><a href="#amenities">Amenities</a></li>
+        <li><a href="#rates">Rates & Pricing</a></li>
+        <li><a href="#reviews">Guest Reviews</a></li>
+        <li><a href="#location">Location</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Book With Us</h4>
+      <ul>
+        <li><a href="#" onclick="openInquiry(event)">Check Availability</a></li>
+        <li><a href="#" onclick="openInquiry(event)">Direct Booking (Best Rate)</a></li>
+        <li><a href="https://airbnb.com" target="_blank">Find on Airbnb ↗</a></li>
+        <li><a href="https://vrbo.com" target="_blank">Find on VRBO ↗</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:nppeterman@gmail.com">📧 Email Host</a></li>
+        <li><a href="tel:+15550000000">📞 Call / Text</a></li>
+        <li><a href="#">🏡 House Rules</a></li>
+        <li><a href="#">❓ FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Little Lake House · 6549 Hwy 129, Monterey, LA 71354</p>
+    <div style="display:flex;gap:16px;align-items:center">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="index.html" class="owner-link">⚙ Owner Login</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ── Availability / Inquiry Modal ──────── -->
+<div class="overlay" id="inquiry-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📅 Check Availability & Book</h3>
+      <button class="modal-close" onclick="closeInquiry()">✕</button>
+    </div>
+    <div class="modal-body" id="inquiry-body">
+      <!-- Step 1: availability check -->
+      <div id="step-avail">
+        <p style="color:var(--muted);font-size:14px;margin-bottom:18px">Enter your dates to check availability. Book direct for the best rate — no platform fees!</p>
+        <div class="fr">
+          <div class="fg"><label>Check-In Date</label><input type="date" id="iq-checkin" /></div>
+          <div class="fg"><label>Check-Out Date</label><input type="date" id="iq-checkout" /></div>
+        </div>
+        <div class="fg"><label>Number of Guests (max 4)</label><input type="number" id="iq-guests" min="1" max="4" placeholder="2" /></div>
+        <button class="btn-submit" style="width:100%;margin-bottom:8px" onclick="runAvailCheck()">Check Availability</button>
+        <div class="avail-result" id="avail-result"></div>
+        <button id="proceed-btn" class="btn-submit" style="width:100%;margin-top:12px;display:none" onclick="showInquiryForm()">Continue to Booking Request →</button>
+      </div>
+      <!-- Step 2: inquiry form -->
+      <div id="step-form" style="display:none">
+        <p style="color:var(--muted);font-size:14px;margin-bottom:18px">Great news — those dates look available! Fill out your info and we'll confirm your booking within 24 hours.</p>
+        <div class="fr">
+          <div class="fg"><label>First Name</label><input type="text" id="iq-fname" /></div>
+          <div class="fg"><label>Last Name</label><input type="text" id="iq-lname" /></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label>Email</label><input type="email" id="iq-email" /></div>
+          <div class="fg"><label>Phone</label><input type="tel" id="iq-phone" /></div>
+        </div>
+        <div class="fg"><label>Special Requests / Questions</label><textarea id="iq-notes" rows="3" placeholder="Anything we should know? Bringing pets, celebrating a special occasion, accessibility needs…"></textarea></div>
+        <div class="fg">
+          <label>How did you hear about us?</label>
+          <select id="iq-source">
+            <option>Google</option><option>Facebook / Instagram</option><option>Airbnb</option>
+            <option>VRBO</option><option>Friend / Family Referral</option><option>Returning Guest</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <!-- Step 3: success -->
+      <div id="step-success" style="display:none">
+        <div class="success-box">
+          <div class="success-icon">🎉</div>
+          <h4>Request Received!</h4>
+          <p>Thanks! We'll review your dates and reach out within <strong>24 hours</strong> to confirm your booking and send payment details.</p>
+          <p style="margin-top:12px">Questions? Email us at <a href="mailto:nppeterman@gmail.com" style="color:var(--lake)">nppeterman@gmail.com</a></p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" id="inquiry-foot">
+      <button class="btn-cancel" onclick="closeInquiry()">Close</button>
+      <button class="btn-submit" id="submit-btn" style="display:none" onclick="submitInquiry()">Send Booking Request 🏡</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Navbar scroll effect ────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ─── Pre-fill hero widget dates ─────────────
+(function() {
+  const today = new Date();
+  const checkin = new Date(today); checkin.setDate(today.getDate() + 14);
+  const checkout = new Date(checkin); checkout.setDate(checkin.getDate() + 3);
+  const fmt = d => d.toISOString().slice(0,10);
+  document.getElementById('w-checkin').value  = fmt(checkin);
+  document.getElementById('w-checkout').value = fmt(checkout);
+  document.getElementById('w-checkin').min    = fmt(today);
+  document.getElementById('iq-checkin').min   = fmt(today);
+})();
+
+// ─── Read bookings from shared localStorage ──
+function getBookings() {
+  try { return JSON.parse(localStorage.getItem('llh_bookings')) || []; } catch { return []; }
+}
+
+function isAvailable(checkin, checkout) {
+  if (!checkin || !checkout || checkin >= checkout) return null; // invalid
+  const bookings = getBookings();
+  const conflicts = bookings.filter(b => {
+    if (b.status === 'Cancelled') return false;
+    // Overlap: b.checkin < checkout AND b.checkout > checkin
+    return b.checkin < checkout && b.checkout > checkin;
+  });
+  return conflicts.length === 0;
+}
+
+// ─── Hero widget → open modal with dates ────
+function checkAvailability() {
+  const ci = document.getElementById('w-checkin').value;
+  const co = document.getElementById('w-checkout').value;
+  const g  = document.getElementById('w-guests').value;
+  openInquiry(null, ci, co, g);
+}
+
+// ─── Modal open/close ────────────────────────
+let savedDates = {};
+function openInquiry(e, ci, co, guests) {
+  if (e) e.preventDefault();
+  // Reset to step 1
+  document.getElementById('step-avail').style.display = '';
+  document.getElementById('step-form').style.display = 'none';
+  document.getElementById('step-success').style.display = 'none';
+  document.getElementById('submit-btn').style.display = 'none';
+  document.getElementById('proceed-btn').style.display = 'none';
+  document.getElementById('avail-result').className = 'avail-result';
+  // Pre-fill if dates passed
+  if (ci) document.getElementById('iq-checkin').value  = ci;
+  if (co) document.getElementById('iq-checkout').value = co;
+  if (guests) document.getElementById('iq-guests').value = guests;
+  document.getElementById('inquiry-overlay').classList.add('open');
+}
+function closeInquiry() {
+  document.getElementById('inquiry-overlay').classList.remove('open');
+}
+document.getElementById('inquiry-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('inquiry-overlay')) closeInquiry();
+});
+
+// ─── Availability check ──────────────────────
+function runAvailCheck() {
+  const ci = document.getElementById('iq-checkin').value;
+  const co = document.getElementById('iq-checkout').value;
+  const res = document.getElementById('avail-result');
+  const procBtn = document.getElementById('proceed-btn');
+  if (!ci || !co) { res.className = 'avail-result busy'; res.textContent = 'Please enter both check-in and check-out dates.'; return; }
+  if (ci >= co) { res.className = 'avail-result busy'; res.textContent = 'Check-out must be after check-in.'; return; }
+  const nights = Math.round((new Date(co) - new Date(ci)) / 864e5);
+  const avail = isAvailable(ci, co);
+  if (avail === null) return;
+  if (avail) {
+    res.className = 'avail-result open';
+    res.textContent = `✓ Great news! Those dates appear available — ${nights} night${nights!==1?'s':''}. Proceed to request your booking below.`;
+    procBtn.style.display = '';
+    savedDates = { ci, co };
+  } else {
+    res.className = 'avail-result busy';
+    res.textContent = `✗ Sorry, those dates are already booked. Please try different dates.`;
+    procBtn.style.display = 'none';
+  }
+}
+
+// ─── Show inquiry form ───────────────────────
+function showInquiryForm() {
+  document.getElementById('step-avail').style.display = 'none';
+  document.getElementById('step-form').style.display = '';
+  document.getElementById('submit-btn').style.display = '';
+}
+
+// ─── Submit inquiry → save to localStorage ───
+function submitInquiry() {
+  const fname = document.getElementById('iq-fname').value.trim();
+  const email = document.getElementById('iq-email').value.trim();
+  if (!fname || !email) { alert('Please enter your name and email.'); return; }
+
+  // Save inquiry into the app's guest + booking data so it shows in the manager
+  const inquiries = JSON.parse(localStorage.getItem('llh_inquiries') || '[]');
+  inquiries.push({
+    id: Date.now().toString(36),
+    fname,
+    lname: document.getElementById('iq-lname').value.trim(),
+    email,
+    phone: document.getElementById('iq-phone').value.trim(),
+    checkin: savedDates.ci || document.getElementById('iq-checkin').value,
+    checkout: savedDates.co || document.getElementById('iq-checkout').value,
+    guests: document.getElementById('iq-guests').value,
+    notes: document.getElementById('iq-notes').value,
+    source: document.getElementById('iq-source').value,
+    submitted: new Date().toISOString(),
+    status: 'New',
+  });
+  localStorage.setItem('llh_inquiries', JSON.stringify(inquiries));
+
+  // Show success
+  document.getElementById('step-form').style.display = 'none';
+  document.getElementById('step-success').style.display = '';
+  document.getElementById('submit-btn').style.display = 'none';
+}
+</script>
+</body>
+</html>

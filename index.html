@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Little Lake House — Property Manager</title>
+<style>
+  /* ─── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:    #1a3a5c;
+    --blue:    #2563eb;
+    --sky:     #38bdf8;
+    --teal:    #0d9488;
+    --green:   #16a34a;
+    --amber:   #d97706;
+    --red:     #dc2626;
+    --purple:  #7c3aed;
+    --bg:      #f0f4f8;
+    --card:    #ffffff;
+    --border:  #e2e8f0;
+    --text:    #1e293b;
+    --muted:   #64748b;
+    --light:   #f8fafc;
+    --sidebar-w: 230px;
+    --header-h: 60px;
+    --radius:  10px;
+    --shadow:  0 2px 8px rgba(0,0,0,.08);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,.12);
+  }
+  /* ─── Dark Mode ────────────────────────────────────────── */
+  html.dark {
+    --bg:      #0f172a;
+    --card:    #1e293b;
+    --border:  #334155;
+    --text:    #f1f5f9;
+    --muted:   #94a3b8;
+    --light:   #1e293b;
+    --shadow:  0 2px 8px rgba(0,0,0,.35);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,.5);
+  }
+  html.dark #topbar { background: #1e293b; }
+  html.dark .form-group input,
+  html.dark .form-group select,
+  html.dark .form-group textarea { background: #0f172a; color: var(--text); border-color: var(--border); }
+  html.dark .form-group input:focus,
+  html.dark .form-group select:focus,
+  html.dark .form-group textarea:focus { background: #0f172a; border-color: var(--blue); }
+  html.dark .search-bar { background: #0f172a; }
+  html.dark .search-bar input { color: var(--text); }
+  html.dark select { background: #0f172a; color: var(--text); border-color: var(--border); }
+  html.dark th { background: #0f172a; }
+  html.dark tr:hover td { background: #263044; }
+  html.dark .cal-cell { background: #1e293b; border-color: var(--border); }
+  html.dark .cal-cell:hover { background: #263044; }
+  html.dark .cal-cell.today { background: #1d3461; border-color: var(--blue); }
+  html.dark .cal-cell.booked { background: #14532d; border-color: var(--green); }
+  html.dark .toast { background: #f1f5f9; color: #0f172a; }
+  /* Dark mode toggle button */
+  .dark-toggle {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: border-color .15s, color .15s;
+  }
+  .dark-toggle:hover { border-color: var(--blue); color: var(--text); }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--text); background: var(--bg); }
+  a { color: inherit; text-decoration: none; }
+  button { cursor: pointer; font-family: inherit; }
+  input, select, textarea { font-family: inherit; }
+
+  /* ─── Layout ───────────────────────────────────────────── */
+  #app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ─── Sidebar ──────────────────────────────────────────── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--navy);
+    display: flex; flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-brand {
+    padding: 20px 18px 14px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .sidebar-brand .brand-icon { font-size: 28px; }
+  .sidebar-brand h1 { color: #fff; font-size: 15px; font-weight: 700; margin-top: 4px; line-height: 1.2; }
+  .sidebar-brand p { color: rgba(255,255,255,.5); font-size: 11px; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 10px 0; }
+  .nav-section-label {
+    color: rgba(255,255,255,.35);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 14px 18px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 18px;
+    color: rgba(255,255,255,.7);
+    font-size: 13.5px;
+    font-weight: 500;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .nav-item.active { background: rgba(37,99,235,.35); color: #fff; }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-item .nav-badge {
+    margin-left: auto;
+    background: var(--blue);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 1px 6px;
+  }
+  .sidebar-footer {
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.4);
+    font-size: 11px;
+  }
+
+  /* ─── Main Content ─────────────────────────────────────── */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #topbar {
+    height: var(--header-h);
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .topbar-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .topbar-date { font-size: 13px; color: var(--muted); }
+
+  #content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* ─── Pages ────────────────────────────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ─── Buttons ──────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: 7px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:hover { opacity: .88; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-success { background: var(--green); color: #fff; }
+  .btn-danger  { background: var(--red);   color: #fff; }
+  .btn-ghost   { background: transparent;  color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-icon { padding: 7px 8px; }
+
+  /* ─── Cards ────────────────────────────────────────────── */
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-header h2 { font-size: 15px; font-weight: 700; }
+  .card-body { padding: 20px; }
+
+  /* ─── Stats Grid ───────────────────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+  .stat-card.blue::before  { background: var(--blue); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.amber::before { background: var(--amber); }
+  .stat-card.purple::before{ background: var(--purple); }
+  .stat-card.teal::before  { background: var(--teal); }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .stat-value { font-size: 28px; font-weight: 800; margin: 4px 0; }
+  .stat-sub   { font-size: 12px; color: var(--muted); }
+  .stat-icon  { position: absolute; right: 16px; top: 16px; font-size: 28px; opacity: .15; }
+
+  /* ─── Tables ───────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 2px solid var(--border); background: var(--light); }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--light); }
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tag-blue   { background: #dbeafe; color: #1d4ed8; }
+  .tag-green  { background: #dcfce7; color: #166534; }
+  .tag-amber  { background: #fef3c7; color: #92400e; }
+  .tag-red    { background: #fee2e2; color: #991b1b; }
+  .tag-purple { background: #ede9fe; color: #5b21b6; }
+  .tag-teal   { background: #ccfbf1; color: #0f766e; }
+  .tag-gray   { background: #f1f5f9; color: #475569; }
+
+  /* ─── Forms / Modal ────────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    width: 520px; max-width: calc(100vw - 32px);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn .2s ease;
+  }
+  @keyframes modalIn { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h3 { font-size: 16px; font-weight: 700; }
+  .modal-body { padding: 22px; }
+  .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+  .close-btn { background: none; border: none; font-size: 20px; color: var(--muted); line-height: 1; }
+  .close-btn:hover { color: var(--text); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .04em; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--light);
+    transition: border-color .15s;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); background: #fff; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ─── Calendar ─────────────────────────────────────────── */
+  .cal-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .cal-controls h2 { font-size: 18px; font-weight: 700; flex: 1; text-align: center; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-day-label { text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; padding: 6px 0; }
+  .cal-cell {
+    min-height: 80px;
+    background: var(--light);
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    padding: 6px;
+    position: relative;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .cal-cell:hover { border-color: var(--blue); background: #eff6ff; }
+  .cal-cell.other-month { opacity: .4; }
+  .cal-cell.today { border-color: var(--blue); background: #eff6ff; }
+  .cal-cell.booked { background: #dcfce7; border-color: var(--green); }
+  .cal-cell.partial { background: #fef3c7; border-color: var(--amber); }
+  .cal-num { font-size: 13px; font-weight: 700; color: var(--text); }
+  .cal-cell.other-month .cal-num { color: var(--muted); }
+  .cal-booking-dot {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--green);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* ─── Dashboard Timeline ────────────────────────────────── */
+  .timeline { padding: 0; list-style: none; }
+  .timeline li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .timeline li:last-child { border-bottom: none; }
+  .timeline-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .timeline-icon.blue   { background: #dbeafe; }
+  .timeline-icon.green  { background: #dcfce7; }
+  .timeline-icon.amber  { background: #fef3c7; }
+  .timeline-icon.red    { background: #fee2e2; }
+  .timeline-info { flex: 1; }
+  .timeline-info strong { font-size: 13.5px; display: block; }
+  .timeline-info span   { font-size: 12px; color: var(--muted); }
+  .timeline-date { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+
+  /* ─── Expense Charts ────────────────────────────────────── */
+  .expense-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .category-bar { margin-bottom: 12px; }
+  .category-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .bar-track { background: var(--border); border-radius: 6px; height: 8px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 6px; transition: width .5s; }
+
+  /* ─── Property ─────────────────────────────────────────── */
+  .prop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .checklist-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--blue); }
+  .checklist-item label { font-size: 13.5px; cursor: pointer; flex: 1; }
+  .checklist-item label.done { text-decoration: line-through; color: var(--muted); }
+
+  /* ─── Misc ─────────────────────────────────────────────── */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-header h2 { font-size: 16px; font-weight: 700; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--sky));
+    color: #fff; font-weight: 700; font-size: 13px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--light);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+  }
+  .search-bar input { border: none; background: none; outline: none; font-size: 13.5px; width: 200px; }
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #1e293b;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all .3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .revenue-bar {
+    height: 160px; display: flex; align-items: flex-end; gap: 6px;
+    padding: 10px 0; overflow: hidden;
+  }
+  .rev-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .rev-col .rev-bar {
+    width: 100%; border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, var(--blue), #60a5fa);
+    min-height: 4px;
+    transition: height .5s;
+  }
+  .rev-col .rev-label { font-size: 10px; color: var(--muted); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  @media (max-width: 700px) {
+    #sidebar { display: none; }
+    .form-row { grid-template-columns: 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .expense-summary { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <nav id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🏡</div>
+      <h1>Little Lake House</h1>
+      <p>Property Manager</p>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+
+      <div class="nav-section-label">Bookings</div>
+      <div class="nav-item" data-page="calendar">
+        <span class="nav-icon">📅</span> Calendar
+      </div>
+      <div class="nav-item" data-page="reservations">
+        <span class="nav-icon">📋</span> Reservations
+        <span class="nav-badge" id="badge-res">0</span>
+      </div>
+
+      <div class="nav-section-label">Guests</div>
+      <div class="nav-item" data-page="guests">
+        <span class="nav-icon">👥</span> Guests
+      </div>
+
+      <div class="nav-section-label">Finances</div>
+      <div class="nav-item" data-page="expenses">
+        <span class="nav-icon">💸</span> Expenses
+      </div>
+      <div class="nav-item" data-page="revenue">
+        <span class="nav-icon">💰</span> Revenue
+      </div>
+
+      <div class="nav-section-label">Property</div>
+      <div class="nav-item" data-page="property">
+        <span class="nav-icon">🔧</span> Maintenance
+      </div>
+      <div class="nav-item" data-page="inventory">
+        <span class="nav-icon">📦</span> Inventory
+      </div>
+      <div class="nav-item" data-page="checklists">
+        <span class="nav-icon">✅</span> Checklists
+      </div>
+
+      <div class="nav-section-label">Website</div>
+      <div class="nav-item" data-page="inquiries">
+        <span class="nav-icon">📬</span> Inquiries
+        <span class="nav-badge" id="badge-inq" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="window.open('website.html','_blank')" style="cursor:pointer">
+        <span class="nav-icon">🌐</span> View Website ↗
+      </div>
+    </div>
+    <div class="sidebar-footer">Little Lake House © 2026</div>
+  </nav>
+
+  <!-- ── Main ───────────────────────────────────────────── -->
+  <div id="main">
+    <div id="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="topbar-date" id="today-date"></div>
+        <button class="dark-toggle" id="dark-toggle-btn" onclick="toggleDark()" title="Toggle dark mode">
+          <span id="dark-icon">🌙</span> <span id="dark-label">Dark</span>
+        </button>
+        <button class="btn btn-primary btn-sm" id="quick-add-btn" onclick="quickAdd()">+ Quick Add</button>
+      </div>
+    </div>
+    <div id="content">
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: DASHBOARD
+      ══════════════════════════════════════════════════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid" id="dash-stats"></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h2>Upcoming Reservations</h2> <a class="btn btn-ghost btn-sm" onclick="navigate('reservations')">View all</a></div>
+            <div class="card-body" id="dash-upcoming"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>Revenue (Last 6 Months)</h2></div>
+            <div class="card-body">
+              <div class="revenue-bar" id="rev-chart"></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:16px">
+          <div class="card">
+            <div class="card-header"><h2>Recent Activity</h2></div>
+            <div class="card-body" id="dash-activity"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>Expense Breakdown</h2></div>
+            <div class="card-body" id="dash-expenses"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: CALENDAR
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-calendar">
+        <div class="card">
+          <div class="card-body">
+            <div class="cal-controls">
+              <button class="btn btn-ghost btn-icon" onclick="calMove(-1)">‹</button>
+              <h2 id="cal-title"></h2>
+              <button class="btn btn-ghost btn-icon" onclick="calMove(1)">›</button>
+              <button class="btn btn-primary btn-sm" onclick="openModal('booking')">+ Booking</button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><h2 id="cal-sel-title">Select a date to view details</h2></div>
+          <div class="card-body" id="cal-detail">
+            <div class="empty-state"><div class="empty-icon">📅</div><p>Click a date on the calendar to see booking details.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: RESERVATIONS
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-reservations">
+        <div class="section-header">
+          <h2>All Reservations</h2>
+          <div style="display:flex;gap:10px">
+            <div class="search-bar"><span>🔍</span><input id="res-search" oninput="renderReservations()" placeholder="Search…" /></div>
+            <button class="btn btn-primary" onclick="openModal('booking')">+ New Booking</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Rate/Night</th><th>Total</th><th>Status</th><th>Paid</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="res-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: GUESTS
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-guests">
+        <div class="section-header">
+          <h2>Guest Directory</h2>
+          <div style="display:flex;gap:10px">
+            <div class="search-bar"><span>🔍</span><input id="guest-search" oninput="renderGuests()" placeholder="Search guests…" /></div>
+            <button class="btn btn-primary" onclick="openModal('guest')">+ Add Guest</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Phone</th><th>Stays</th><th>Total Spent</th><th>Last Stay</th><th>Notes</th><th></th></tr>
+              </thead>
+              <tbody id="guest-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: EXPENSES
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-expenses">
+        <div class="section-header">
+          <h2>Expense Tracker</h2>
+          <button class="btn btn-primary" onclick="openModal('expense')">+ Add Expense</button>
+        </div>
+        <div class="expense-summary">
+          <div class="card">
+            <div class="card-header"><h2>By Category</h2></div>
+            <div class="card-body" id="exp-cat-chart"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>This Year Summary</h2></div>
+            <div class="card-body" id="exp-summary"></div>
+          </div>
+        </div>
+        <div class="section-header">
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="search-bar"><span>🔍</span><input id="exp-search" oninput="renderExpenses()" placeholder="Search…" /></div>
+            <select id="exp-cat-filter" onchange="renderExpenses()" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;">
+              <option value="">All categories</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Vendor</th><th>Notes</th><th></th></tr></thead>
+              <tbody id="exp-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: REVENUE
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-revenue">
+        <div class="stats-grid" id="rev-stats"></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h2>Monthly Revenue</h2></div>
+            <div class="card-body">
+              <div class="revenue-bar" id="rev-chart-full"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>Net Income</h2></div>
+            <div class="card-body" id="net-income-box"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><h2>Revenue by Booking</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Revenue</th><th>Status</th></tr></thead>
+              <tbody id="rev-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: PROPERTY / MAINTENANCE
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-property">
+        <div class="section-header">
+          <h2>Maintenance Log</h2>
+          <button class="btn btn-primary" onclick="openModal('maintenance')">+ Log Issue</button>
+        </div>
+        <div class="stats-grid" id="maint-stats"></div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Issue</th><th>Category</th><th>Priority</th><th>Status</th><th>Cost</th><th>Vendor</th><th></th></tr></thead>
+              <tbody id="maint-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: INVENTORY
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-inventory">
+        <div class="section-header">
+          <h2>Inventory & Supplies</h2>
+          <button class="btn btn-primary" onclick="openModal('inventory')">+ Add Item</button>
+        </div>
+        <div class="prop-grid" id="inventory-grid"></div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: CHECKLISTS
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-checklists">
+        <div class="section-header">
+          <h2>Property Checklists</h2>
+          <button class="btn btn-primary" onclick="addChecklistItem()">+ Add Item</button>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h2>🧹 Check-in / Cleaning</h2><button class="btn btn-ghost btn-sm" onclick="resetChecklist('cleaning')">Reset</button></div>
+            <div class="card-body" id="cl-cleaning"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>🏠 Check-out Inspection</h2><button class="btn btn-ghost btn-sm" onclick="resetChecklist('checkout')">Reset</button></div>
+            <div class="card-body" id="cl-checkout"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>🌿 Seasonal Prep</h2><button class="btn btn-ghost btn-sm" onclick="resetChecklist('seasonal')">Reset</button></div>
+            <div class="card-body" id="cl-seasonal"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>🛡️ Safety & Emergency</h2><button class="btn btn-ghost btn-sm" onclick="resetChecklist('safety')">Reset</button></div>
+            <div class="card-body" id="cl-safety"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PAGE: INQUIRIES
+      ══════════════════════════════════════════════════ -->
+      <div class="page" id="page-inquiries">
+        <div class="section-header">
+          <h2>Website Inquiries</h2>
+          <a href="website.html" target="_blank" class="btn btn-primary">🌐 View Website ↗</a>
+        </div>
+        <div class="stats-grid" id="inq-stats"></div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Submitted</th><th>Name</th><th>Email</th><th>Dates</th><th>Guests</th><th>Source</th><th>Notes</th><th>Status</th><th></th></tr></thead>
+              <tbody id="inq-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════════════ -->
+
+<!-- Booking Modal -->
+<div class="modal-overlay" id="modal-booking">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="booking-modal-title">New Reservation</h3>
+      <button class="close-btn" onclick="closeModal('booking')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="booking-id" />
+      <div class="form-group">
+        <label>Guest</label>
+        <select id="booking-guest">
+          <option value="">-- Select Guest --</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Check-in Date</label>
+          <input type="date" id="booking-checkin" />
+        </div>
+        <div class="form-group">
+          <label>Check-out Date</label>
+          <input type="date" id="booking-checkout" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Rate per Night ($)</label>
+          <input type="number" id="booking-rate" placeholder="200" />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="booking-status">
+            <option>Confirmed</option>
+            <option>Pending</option>
+            <option>Cancelled</option>
+            <option>Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Deposit Paid ($)</label>
+          <input type="number" id="booking-deposit" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label>Amount Paid ($)</label>
+          <input type="number" id="booking-paid" placeholder="0" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Source (Airbnb, VRBO, Direct…)</label>
+        <input type="text" id="booking-source" placeholder="Direct" />
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="booking-notes" rows="2" placeholder="Special requests, notes…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('booking')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBooking()">Save Reservation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Guest Modal -->
+<div class="modal-overlay" id="modal-guest">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="guest-modal-title">Add Guest</h3>
+      <button class="close-btn" onclick="closeModal('guest')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="guest-id" />
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" id="guest-fname" /></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="guest-lname" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="guest-email" /></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="guest-phone" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input type="text" id="guest-city" /></div>
+        <div class="form-group"><label>State</label><input type="text" id="guest-state" /></div>
+      </div>
+      <div class="form-group"><label>How did they find us?</label><input type="text" id="guest-source" placeholder="Airbnb, Referral, etc." /></div>
+      <div class="form-group"><label>Notes</label><textarea id="guest-notes" rows="2" placeholder="Any notes about this guest…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('guest')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveGuest()">Save Guest</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-overlay" id="modal-expense">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="expense-modal-title">Add Expense</h3>
+      <button class="close-btn" onclick="closeModal('expense')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="expense-id" />
+      <div class="form-row">
+        <div class="form-group"><label>Date</label><input type="date" id="expense-date" /></div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="expense-category">
+            <option>Utilities</option>
+            <option>Maintenance & Repairs</option>
+            <option>Cleaning</option>
+            <option>Supplies</option>
+            <option>Insurance</option>
+            <option>Marketing</option>
+            <option>Taxes & Fees</option>
+            <option>Mortgage / Rent</option>
+            <option>Landscaping</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Description</label><input type="text" id="expense-desc" placeholder="Brief description" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Amount ($)</label><input type="number" id="expense-amount" placeholder="0.00" /></div>
+        <div class="form-group"><label>Vendor / Payee</label><input type="text" id="expense-vendor" /></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="expense-notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('expense')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Save Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- Maintenance Modal -->
+<div class="modal-overlay" id="modal-maintenance">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Log Maintenance Issue</h3>
+      <button class="close-btn" onclick="closeModal('maintenance')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="maint-id" />
+      <div class="form-row">
+        <div class="form-group"><label>Date</label><input type="date" id="maint-date" /></div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="maint-category">
+            <option>Plumbing</option><option>Electrical</option><option>HVAC</option>
+            <option>Appliances</option><option>Exterior</option><option>Interior</option>
+            <option>Landscaping</option><option>Pest Control</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Issue Description</label><input type="text" id="maint-issue" /></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="maint-priority">
+            <option>Low</option><option>Medium</option><option>High</option><option>Emergency</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="maint-status">
+            <option>Open</option><option>In Progress</option><option>Resolved</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Cost ($)</label><input type="number" id="maint-cost" placeholder="0" /></div>
+        <div class="form-group"><label>Vendor / Contractor</label><input type="text" id="maint-vendor" /></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="maint-notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('maintenance')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMaintenance()">Save Issue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inventory Modal -->
+<div class="modal-overlay" id="modal-inventory">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Inventory Item</h3>
+      <button class="close-btn" onclick="closeModal('inventory')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="inv-id" />
+      <div class="form-group"><label>Item Name</label><input type="text" id="inv-name" /></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="inv-category">
+            <option>Linens & Towels</option><option>Kitchen</option><option>Bathroom</option>
+            <option>Outdoor</option><option>Cleaning Supplies</option><option>Electronics</option>
+            <option>Tools</option><option>Guest Amenities</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Quantity</label><input type="number" id="inv-qty" placeholder="1" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Condition</label>
+          <select id="inv-condition">
+            <option>Excellent</option><option>Good</option><option>Fair</option><option>Needs Replacement</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Reorder When Below</label><input type="number" id="inv-reorder" placeholder="2" /></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="inv-notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('inventory')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInventory()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════════
+//  DATA LAYER
+// ═══════════════════════════════════════════════
+const DB = {
+  load(key, def=[]) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } },
+  save(key, val)    { localStorage.setItem(key, JSON.stringify(val)); }
+};
+
+let bookings   = DB.load('llh_bookings');
+let guests     = DB.load('llh_guests');
+let expenses   = DB.load('llh_expenses');
+let maintenances = DB.load('llh_maintenances');
+let inventory  = DB.load('llh_inventory');
+let checklists = DB.load('llh_checklists', getDefaultChecklists());
+
+function persist() {
+  DB.save('llh_bookings', bookings);
+  DB.save('llh_guests', guests);
+  DB.save('llh_expenses', expenses);
+  DB.save('llh_maintenances', maintenances);
+  DB.save('llh_inventory', inventory);
+  DB.save('llh_checklists', checklists);
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// ── Seed sample data if empty ────────────────────
+function seedData() {
+  if (guests.length || bookings.length) return;
+
+  guests = [
+    { id: uid(), fname: 'Sarah', lname: 'Johnson', email: 'sarah@email.com', phone: '555-0101', city: 'Chicago', state: 'IL', source: 'Airbnb', notes: 'Loves the kayaks. Has a dog.' },
+    { id: uid(), fname: 'Mike', lname: 'Chen', email: 'mike.chen@email.com', phone: '555-0182', city: 'Detroit', state: 'MI', source: 'VRBO', notes: 'Family of 4. Great guest.' },
+    { id: uid(), fname: 'Emily', lname: 'Williams', email: 'emily.w@email.com', phone: '555-0234', city: 'Indianapolis', state: 'IN', source: 'Direct', notes: 'Repeat guest — discount applied.' },
+    { id: uid(), fname: 'Tom', lname: 'Ramirez', email: 'tom.r@email.com', phone: '555-0315', city: 'Columbus', state: 'OH', source: 'Referral', notes: '' },
+  ];
+
+  const today = new Date();
+  const fmt = d => d.toISOString().slice(0,10);
+  const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+
+  bookings = [
+    { id: uid(), guestId: guests[0].id, checkin: fmt(addDays(today, 5)), checkout: fmt(addDays(today, 10)), rate: 220, status: 'Confirmed', deposit: 220, paid: 660, source: 'Airbnb', notes: 'Bringing kayak gear' },
+    { id: uid(), guestId: guests[1].id, checkin: fmt(addDays(today, 18)), checkout: fmt(addDays(today, 23)), rate: 200, status: 'Confirmed', deposit: 200, paid: 200, source: 'VRBO', notes: '' },
+    { id: uid(), guestId: guests[2].id, checkin: fmt(addDays(today, -14)), checkout: fmt(addDays(today, -10)), rate: 185, status: 'Completed', deposit: 185, paid: 740, source: 'Direct', notes: 'Repeat guest' },
+    { id: uid(), guestId: guests[3].id, checkin: fmt(addDays(today, -40)), checkout: fmt(addDays(today, -36)), rate: 200, status: 'Completed', deposit: 200, paid: 800, source: 'Referral', notes: '' },
+    { id: uid(), guestId: guests[0].id, checkin: fmt(addDays(today, 35)), checkout: fmt(addDays(today, 40)), rate: 235, status: 'Pending', deposit: 0, paid: 0, source: 'Direct', notes: 'Awaiting deposit' },
+  ];
+
+  expenses = [
+    { id: uid(), date: fmt(addDays(today,-5)),  desc: 'Electric bill',           category: 'Utilities',           amount: 142.50, vendor: 'DTE Energy',    notes: '' },
+    { id: uid(), date: fmt(addDays(today,-8)),  desc: 'Professional cleaning',   category: 'Cleaning',            amount: 180,    vendor: 'CleanCo',       notes: 'After Sarah\'s stay' },
+    { id: uid(), date: fmt(addDays(today,-12)), desc: 'Leaky faucet repair',     category: 'Maintenance & Repairs', amount: 220, vendor: 'Bob the Plumber', notes: '' },
+    { id: uid(), date: fmt(addDays(today,-20)), desc: 'Paper towels, soap, etc', category: 'Supplies',            amount: 67.30,  vendor: 'Costco',        notes: '' },
+    { id: uid(), date: fmt(addDays(today,-30)), desc: 'Home insurance premium',  category: 'Insurance',           amount: 310,    vendor: 'State Farm',    notes: 'Monthly' },
+    { id: uid(), date: fmt(addDays(today,-35)), desc: 'Lawn mowing',             category: 'Landscaping',         amount: 80,     vendor: 'GreenThumb',    notes: '' },
+    { id: uid(), date: fmt(addDays(today,-45)), desc: 'Water/sewer bill',        category: 'Utilities',           amount: 88.20,  vendor: 'City Water',    notes: '' },
+    { id: uid(), date: fmt(addDays(today,-50)), desc: 'Airbnb host fees',        category: 'Taxes & Fees',        amount: 65,     vendor: 'Airbnb',        notes: '' },
+  ];
+
+  maintenances = [
+    { id: uid(), date: fmt(addDays(today,-12)), issue: 'Leaky kitchen faucet',      category: 'Plumbing',   priority: 'High',   status: 'Resolved',     cost: 220, vendor: 'Bob the Plumber', notes: '' },
+    { id: uid(), date: fmt(addDays(today,-3)),  issue: 'Deck boards need staining', category: 'Exterior',   priority: 'Medium', status: 'Open',         cost: 0,   vendor: '',                notes: 'Plan for spring' },
+    { id: uid(), date: fmt(addDays(today,-1)),  issue: 'Smoke detector battery low',category: 'Interior',   priority: 'High',   status: 'In Progress',  cost: 15,  vendor: '',                notes: 'Buy 9V batteries' },
+    { id: uid(), date: fmt(addDays(today,-60)), issue: 'AC tune-up',                category: 'HVAC',       priority: 'Low',    status: 'Resolved',     cost: 120, vendor: 'CoolBreeze HVAC', notes: 'Annual service' },
+  ];
+
+  inventory = [
+    { id: uid(), name: 'Queen Bed Sheets (Set)', category: 'Linens & Towels', qty: 4, condition: 'Good',      reorder: 2, notes: '' },
+    { id: uid(), name: 'Bath Towels',            category: 'Linens & Towels', qty: 8, condition: 'Good',      reorder: 4, notes: '' },
+    { id: uid(), name: 'Life Jackets',           category: 'Outdoor',         qty: 6, condition: 'Excellent', reorder: 4, notes: 'Check straps each season' },
+    { id: uid(), name: 'Kayak Paddles',          category: 'Outdoor',         qty: 4, condition: 'Good',      reorder: 2, notes: '' },
+    { id: uid(), name: 'Coffee Maker',           category: 'Kitchen',         qty: 1, condition: 'Excellent', reorder: 1, notes: '' },
+    { id: uid(), name: 'Dish Soap / Sponges',    category: 'Cleaning Supplies', qty: 3, condition: 'Good',   reorder: 1, notes: '' },
+    { id: uid(), name: 'Toilet Paper (rolls)',   category: 'Bathroom',        qty: 24, condition: 'Good',     reorder: 6, notes: '' },
+    { id: uid(), name: 'Paper Towels (rolls)',   category: 'Supplies',        qty: 6,  condition: 'Good',     reorder: 3, notes: '' },
+  ];
+
+  persist();
+}
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+let currentPage = 'dashboard';
+
+const pageTitles = {
+  dashboard: 'Dashboard',
+  calendar: 'Booking Calendar',
+  reservations: 'Reservations',
+  guests: 'Guest Directory',
+  expenses: 'Expense Tracker',
+  revenue: 'Revenue',
+  property: 'Maintenance Log',
+  inventory: 'Inventory & Supplies',
+  checklists: 'Checklists',
+  inquiries: 'Website Inquiries',
+};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[page];
+  currentPage = page;
+  renderPage(page);
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => navigate(item.dataset.page));
+});
+
+function renderPage(p) {
+  if (p === 'dashboard')    renderDashboard();
+  if (p === 'calendar')     renderCalendar();
+  if (p === 'reservations') renderReservations();
+  if (p === 'guests')       renderGuests();
+  if (p === 'expenses')     renderExpenses();
+  if (p === 'revenue')      renderRevenue();
+  if (p === 'property')     renderMaintenance();
+  if (p === 'inventory')    renderInventory();
+  if (p === 'checklists')   renderChecklists();
+  if (p === 'inquiries')    renderInquiries();
+}
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+const fmt$ = n => '$' + Number(n||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtDate = s => { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${m}/${d}/${y}`; };
+const nightsBetween = (a, b) => { if (!a||!b) return 0; return Math.max(0, Math.round((new Date(b)-new Date(a))/(864e5))); };
+
+function guestName(gid) {
+  const g = guests.find(x => x.id === gid);
+  return g ? `${g.fname} ${g.lname}` : '—';
+}
+
+function guestInitials(gid) {
+  const g = guests.find(x => x.id === gid);
+  return g ? (g.fname[0]||'') + (g.lname[0]||'') : '?';
+}
+
+function bookingTotal(b) {
+  return nightsBetween(b.checkin, b.checkout) * (b.rate||0);
+}
+
+const statusColors = {
+  Confirmed: 'tag-blue',
+  Pending: 'tag-amber',
+  Cancelled: 'tag-red',
+  Completed: 'tag-green',
+};
+const priorityColors = {
+  Low: 'tag-gray', Medium: 'tag-amber', High: 'tag-red', Emergency: 'tag-red'
+};
+const maintStatusColors = {
+  Open: 'tag-amber', 'In Progress': 'tag-blue', Resolved: 'tag-green'
+};
+const conditionColors = {
+  Excellent: 'tag-green', Good: 'tag-blue', Fair: 'tag-amber', 'Needs Replacement': 'tag-red'
+};
+
+// ═══════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = bookings.filter(b => b.checkin >= today && b.status !== 'Cancelled').sort((a,b)=>a.checkin.localeCompare(b.checkin));
+  const thisYear = new Date().getFullYear();
+  const yearBookings = bookings.filter(b => b.status !== 'Cancelled' && b.checkin.startsWith(thisYear));
+  const totalRevenue = yearBookings.reduce((s,b) => s + bookingTotal(b), 0);
+  const totalExpenses = expenses.filter(e => e.date.startsWith(thisYear)).reduce((s,e)=>s+(+e.amount||0),0);
+  const openMaint = maintenances.filter(m => m.status !== 'Resolved').length;
+  const occupiedNights = yearBookings.reduce((s,b)=>s+nightsBetween(b.checkin,b.checkout),0);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card blue">  <div class="stat-label">Upcoming Bookings</div><div class="stat-value">${upcoming.length}</div><div class="stat-sub">Next: ${upcoming[0]?fmtDate(upcoming[0].checkin):'None'}</div><div class="stat-icon">📅</div></div>
+    <div class="stat-card green"> <div class="stat-label">${thisYear} Revenue</div><div class="stat-value">${fmt$(totalRevenue)}</div><div class="stat-sub">${yearBookings.length} bookings</div><div class="stat-icon">💰</div></div>
+    <div class="stat-card amber"> <div class="stat-label">${thisYear} Expenses</div><div class="stat-value">${fmt$(totalExpenses)}</div><div class="stat-sub">Net: ${fmt$(totalRevenue-totalExpenses)}</div><div class="stat-icon">💸</div></div>
+    <div class="stat-card purple"><div class="stat-label">Occupied Nights</div><div class="stat-value">${occupiedNights}</div><div class="stat-sub">This year</div><div class="stat-icon">🌙</div></div>
+    <div class="stat-card teal">  <div class="stat-label">Open Issues</div><div class="stat-value">${openMaint}</div><div class="stat-sub">Maintenance</div><div class="stat-icon">🔧</div></div>
+  `;
+
+  // Upcoming table
+  const upcomingEl = document.getElementById('dash-upcoming');
+  if (!upcoming.length) { upcomingEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>No upcoming reservations.</p></div>'; }
+  else {
+    upcomingEl.innerHTML = `<ul class="timeline">${upcoming.slice(0,5).map(b=>`
+      <li>
+        <div class="timeline-icon blue"><div class="avatar">${guestInitials(b.guestId)}</div></div>
+        <div class="timeline-info">
+          <strong>${guestName(b.guestId)}</strong>
+          <span>${fmtDate(b.checkin)} → ${fmtDate(b.checkout)} · ${nightsBetween(b.checkin,b.checkout)} nights</span>
+        </div>
+        <div class="timeline-date"><span class="tag ${statusColors[b.status]||'tag-gray'}">${b.status}</span></div>
+      </li>
+    `).join('')}</ul>`;
+  }
+
+  // Revenue chart
+  renderRevenueChart('rev-chart', 6);
+
+  // Recent activity
+  const acts = [
+    ...bookings.map(b=>({ date: b.checkin, icon:'📅', color:'blue', text: `Booking: ${guestName(b.guestId)}`, sub: fmtDate(b.checkin)+' – '+fmtDate(b.checkout) })),
+    ...expenses.map(e=>({ date: e.date, icon:'💸', color:'amber', text: e.desc, sub: fmt$(e.amount) })),
+    ...maintenances.map(m=>({ date: m.date, icon:'🔧', color:'red', text: m.issue, sub: m.status })),
+  ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+
+  document.getElementById('dash-activity').innerHTML = acts.length
+    ? `<ul class="timeline">${acts.map(a=>`
+        <li>
+          <div class="timeline-icon ${a.color}">${a.icon}</div>
+          <div class="timeline-info"><strong>${a.text}</strong><span>${a.sub}</span></div>
+          <div class="timeline-date">${fmtDate(a.date)}</div>
+        </li>`).join('')}</ul>`
+    : '<div class="empty-state"><p>No activity yet.</p></div>';
+
+  // Expense breakdown
+  const catTotals = {};
+  expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category]||0)+(+e.amount||0); });
+  const maxCat = Math.max(...Object.values(catTotals), 1);
+  const catColors = ['var(--blue)','var(--green)','var(--amber)','var(--purple)','var(--teal)','var(--red)'];
+  document.getElementById('dash-expenses').innerHTML = Object.entries(catTotals)
+    .sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([cat,amt],i)=>`
+      <div class="category-bar">
+        <div class="category-bar-label"><span>${cat}</span><span>${fmt$(amt)}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(amt/maxCat*100).toFixed(1)}%;background:${catColors[i%catColors.length]}"></div></div>
+      </div>`).join('') || '<p style="color:var(--muted)">No expenses recorded.</p>';
+
+  updateBadges();
+}
+
+function renderRevenueChart(elId, months) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const monthData = [];
+  const now = new Date();
+  for (let i = months-1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const rev = bookings.filter(b => b.status!=='Cancelled' && b.checkin.startsWith(key)).reduce((s,b)=>s+bookingTotal(b),0);
+    monthData.push({ label: d.toLocaleString('default',{month:'short'}), rev });
+  }
+  const maxR = Math.max(...monthData.map(m=>m.rev), 1);
+  el.innerHTML = monthData.map(m=>`
+    <div class="rev-col">
+      <div class="rev-bar" style="height:${Math.max(4,(m.rev/maxR*130)).toFixed(0)}px" title="${fmt$(m.rev)}"></div>
+      <div class="rev-label">${m.label}</div>
+    </div>`).join('');
+}
+
+function updateBadges() {
+  const today = new Date().toISOString().slice(0,10);
+  const active = bookings.filter(b => b.checkin >= today && b.status !== 'Cancelled').length;
+  document.getElementById('badge-res').textContent = active;
+  // Inquiry badge
+  const newInq = getInquiries().filter(i=>i.status==='New').length;
+  const inqBadge = document.getElementById('badge-inq');
+  if (newInq > 0) { inqBadge.textContent = newInq; inqBadge.style.display = ''; }
+  else { inqBadge.style.display = 'none'; }
+}
+
+// ═══════════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════════
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calSelectedDate = null;
+
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-title').textContent = `${months[calMonth]} ${calYear}`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date().toISOString().slice(0,10);
+
+  const grid = document.getElementById('cal-grid');
+  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = dayLabels.map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+
+  // Pad start
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+  for (let i = firstDay-1; i >= 0; i--) {
+    html += `<div class="cal-cell other-month"><span class="cal-num">${prevDays-i}</span></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayBookings = bookings.filter(b => b.status!=='Cancelled' && b.checkin <= dateStr && b.checkout > dateStr);
+    const isToday = dateStr === today;
+    const isSelected = dateStr === calSelectedDate;
+    let cls = 'cal-cell';
+    if (isToday) cls += ' today';
+    if (dayBookings.length > 0) cls += ' booked';
+    if (isSelected) cls += ' selected';
+    html += `<div class="${cls}" onclick="calSelect('${dateStr}')">
+      <span class="cal-num">${day}</span>
+      ${dayBookings.slice(0,2).map(b=>`<span class="cal-booking-dot">✓ ${guestName(b.guestId)}</span>`).join('')}
+    </div>`;
+  }
+
+  // Pad end
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-cell other-month"><span class="cal-num">${i}</span></div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function calMove(dir) { calMonth += dir; if (calMonth > 11) { calMonth=0; calYear++; } if (calMonth<0) { calMonth=11; calYear--; } renderCalendar(); }
+
+function calSelect(dateStr) {
+  calSelectedDate = dateStr;
+  document.getElementById('cal-sel-title').textContent = `Details for ${fmtDate(dateStr)}`;
+  const dayBookings = bookings.filter(b => b.status!=='Cancelled' && b.checkin <= dateStr && b.checkout > dateStr);
+  const el = document.getElementById('cal-detail');
+  if (!dayBookings.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏡</div><p>No bookings on this date. <a style="color:var(--blue);cursor:pointer" onclick="openModal('booking')">Add one?</a></p></div>`;
+  } else {
+    el.innerHTML = dayBookings.map(b=>`
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+        <div class="avatar" style="width:40px;height:40px;font-size:15px">${guestInitials(b.guestId)}</div>
+        <div style="flex:1">
+          <strong>${guestName(b.guestId)}</strong><br>
+          <span style="font-size:13px;color:var(--muted)">${fmtDate(b.checkin)} → ${fmtDate(b.checkout)} · ${nightsBetween(b.checkin,b.checkout)} nights · ${fmt$(bookingTotal(b))}</span>
+        </div>
+        <span class="tag ${statusColors[b.status]||'tag-gray'}">${b.status}</span>
+        <button class="btn btn-ghost btn-sm" onclick="editBooking('${b.id}')">Edit</button>
+      </div>`).join('');
+  }
+  renderCalendar();
+}
+
+// ═══════════════════════════════════════════════
+//  RESERVATIONS
+// ═══════════════════════════════════════════════
+function renderReservations() {
+  const q = (document.getElementById('res-search')?.value||'').toLowerCase();
+  const tbody = document.getElementById('res-tbody');
+  const sorted = [...bookings].sort((a,b)=>b.checkin.localeCompare(a.checkin));
+  const filtered = sorted.filter(b => {
+    const name = guestName(b.guestId).toLowerCase();
+    return !q || name.includes(q) || b.status.toLowerCase().includes(q) || b.source?.toLowerCase().includes(q);
+  });
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📋</div><p>No reservations found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(b=>{
+    const nights = nightsBetween(b.checkin,b.checkout);
+    const total = bookingTotal(b);
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar">${guestInitials(b.guestId)}</div>${guestName(b.guestId)}</div></td>
+      <td>${fmtDate(b.checkin)}</td>
+      <td>${fmtDate(b.checkout)}</td>
+      <td>${nights}</td>
+      <td>${fmt$(b.rate)}</td>
+      <td><strong>${fmt$(total)}</strong></td>
+      <td><span class="tag ${statusColors[b.status]||'tag-gray'}">${b.status}</span></td>
+      <td>${fmt$(b.paid)}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="editBooking('${b.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+  updateBadges();
+}
+
+// ═══════════════════════════════════════════════
+//  GUESTS
+// ═══════════════════════════════════════════════
+function renderGuests() {
+  const q = (document.getElementById('guest-search')?.value||'').toLowerCase();
+  const tbody = document.getElementById('guest-tbody');
+  const filtered = guests.filter(g => !q || `${g.fname} ${g.lname} ${g.email}`.toLowerCase().includes(q));
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">👥</div><p>No guests found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(g=>{
+    const gb = bookings.filter(b=>b.guestId===g.id && b.status!=='Cancelled');
+    const spent = gb.reduce((s,b)=>s+bookingTotal(b),0);
+    const lastStay = gb.sort((a,b)=>b.checkin.localeCompare(a.checkin))[0];
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar">${(g.fname[0]||'')+(g.lname[0]||'')}</div><strong>${g.fname} ${g.lname}</strong></div></td>
+      <td><a href="mailto:${g.email}" style="color:var(--blue)">${g.email}</a></td>
+      <td>${g.phone||'—'}</td>
+      <td>${gb.length}</td>
+      <td>${fmt$(spent)}</td>
+      <td>${lastStay?fmtDate(lastStay.checkin):'Never'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.notes||'—'}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="editGuest('${g.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteGuest('${g.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  EXPENSES
+// ═══════════════════════════════════════════════
+function renderExpenses() {
+  const q    = (document.getElementById('exp-search')?.value||'').toLowerCase();
+  const cat  = document.getElementById('exp-cat-filter')?.value||'';
+  const cats = [...new Set(expenses.map(e=>e.category))].sort();
+  const filterEl = document.getElementById('exp-cat-filter');
+  if (filterEl && filterEl.options.length < 2) {
+    cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; filterEl.appendChild(o); });
+  }
+  const filtered = expenses.filter(e=>{
+    if (cat && e.category!==cat) return false;
+    if (q && !`${e.desc} ${e.vendor} ${e.category}`.toLowerCase().includes(q)) return false;
+    return true;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+
+  const tbody = document.getElementById('exp-tbody');
+  if (!filtered.length) { tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">💸</div><p>No expenses found.</p></div></td></tr>`; }
+  else {
+    tbody.innerHTML = filtered.map(e=>`<tr>
+      <td>${fmtDate(e.date)}</td>
+      <td><strong>${e.desc}</strong></td>
+      <td><span class="tag tag-blue">${e.category}</span></td>
+      <td><strong>${fmt$(e.amount)}</strong></td>
+      <td>${e.vendor||'—'}</td>
+      <td style="color:var(--muted);font-size:12px">${e.notes||'—'}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="editExpense('${e.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteExpense('${e.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+  }
+
+  // Category chart
+  const catTotals = {};
+  expenses.forEach(e=>{ catTotals[e.category]=(catTotals[e.category]||0)+(+e.amount||0); });
+  const maxCat = Math.max(...Object.values(catTotals),1);
+  const catColors=['var(--blue)','var(--green)','var(--amber)','var(--purple)','var(--teal)','var(--red)'];
+  document.getElementById('exp-cat-chart').innerHTML = Object.entries(catTotals)
+    .sort((a,b)=>b[1]-a[1]).map(([c,a],i)=>`
+      <div class="category-bar">
+        <div class="category-bar-label"><span>${c}</span><span>${fmt$(a)}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(a/maxCat*100).toFixed(1)}%;background:${catColors[i%catColors.length]}"></div></div>
+      </div>`).join('') || '<p style="color:var(--muted)">No data.</p>';
+
+  // Summary
+  const total = expenses.reduce((s,e)=>s+(+e.amount||0),0);
+  const thisYear = new Date().getFullYear();
+  const yearTotal = expenses.filter(e=>e.date.startsWith(thisYear)).reduce((s,e)=>s+(+e.amount||0),0);
+  document.getElementById('exp-summary').innerHTML = `
+    <div style="margin-bottom:12px"><div class="stat-label">Total All Time</div><div class="stat-value" style="font-size:22px">${fmt$(total)}</div></div>
+    <div style="margin-bottom:12px"><div class="stat-label">This Year (${thisYear})</div><div class="stat-value" style="font-size:22px">${fmt$(yearTotal)}</div></div>
+    <div><div class="stat-label">Number of Expenses</div><div class="stat-value" style="font-size:22px">${expenses.length}</div></div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+//  REVENUE
+// ═══════════════════════════════════════════════
+function renderRevenue() {
+  const thisYear = new Date().getFullYear();
+  const yearBookings = bookings.filter(b=>b.status!=='Cancelled'&&b.checkin.startsWith(thisYear));
+  const totalRev = yearBookings.reduce((s,b)=>s+bookingTotal(b),0);
+  const totalPaid = yearBookings.reduce((s,b)=>s+(+b.paid||0),0);
+  const totalExp = expenses.filter(e=>e.date.startsWith(thisYear)).reduce((s,e)=>s+(+e.amount||0),0);
+  const net = totalRev - totalExp;
+  const nights = yearBookings.reduce((s,b)=>s+nightsBetween(b.checkin,b.checkout),0);
+  const avgNightly = yearBookings.length ? totalRev/nights : 0;
+
+  document.getElementById('rev-stats').innerHTML = `
+    <div class="stat-card green"><div class="stat-label">${thisYear} Gross Revenue</div><div class="stat-value">${fmt$(totalRev)}</div><div class="stat-sub">${yearBookings.length} bookings</div><div class="stat-icon">💰</div></div>
+    <div class="stat-card blue"> <div class="stat-label">Collected</div><div class="stat-value">${fmt$(totalPaid)}</div><div class="stat-sub">Outstanding: ${fmt$(totalRev-totalPaid)}</div><div class="stat-icon">🏦</div></div>
+    <div class="stat-card amber"><div class="stat-label">Total Expenses</div><div class="stat-value">${fmt$(totalExp)}</div><div class="stat-sub">This year</div><div class="stat-icon">💸</div></div>
+    <div class="stat-card ${net>=0?'green':'red'}"><div class="stat-label">Net Income</div><div class="stat-value">${fmt$(net)}</div><div class="stat-sub">${net>=0?'Profitable':'Loss'}</div><div class="stat-icon">📈</div></div>
+    <div class="stat-card purple"><div class="stat-label">Avg Nightly Rate</div><div class="stat-value">${fmt$(avgNightly)}</div><div class="stat-sub">${nights} nights booked</div><div class="stat-icon">🌙</div></div>
+  `;
+
+  renderRevenueChart('rev-chart-full', 12);
+
+  // Net income monthly
+  const netRows = [];
+  for (let m = 0; m < 12; m++) {
+    const key = `${thisYear}-${String(m+1).padStart(2,'0')}`;
+    const rev = bookings.filter(b=>b.status!=='Cancelled'&&b.checkin.startsWith(key)).reduce((s,b)=>s+bookingTotal(b),0);
+    const exp = expenses.filter(e=>e.date.startsWith(key)).reduce((s,e)=>s+(+e.amount||0),0);
+    if (rev||exp) netRows.push({ month: new Date(thisYear,m).toLocaleString('default',{month:'long'}), rev, exp, net: rev-exp });
+  }
+  document.getElementById('net-income-box').innerHTML = netRows.length
+    ? `<table style="width:100%"><thead><tr><th>Month</th><th>Revenue</th><th>Expenses</th><th>Net</th></tr></thead><tbody>
+        ${netRows.map(r=>`<tr><td>${r.month}</td><td style="color:var(--green)">${fmt$(r.rev)}</td><td style="color:var(--red)">${fmt$(r.exp)}</td><td style="color:${r.net>=0?'var(--green)':'var(--red)'}"><strong>${fmt$(r.net)}</strong></td></tr>`).join('')}
+       </tbody></table>`
+    : '<p style="color:var(--muted);text-align:center;padding:20px">No data for this year yet.</p>';
+
+  const tbody = document.getElementById('rev-tbody');
+  tbody.innerHTML = bookings.filter(b=>b.status!=='Cancelled').sort((a,b)=>b.checkin.localeCompare(a.checkin)).map(b=>`
+    <tr>
+      <td>${guestName(b.guestId)}</td>
+      <td>${fmtDate(b.checkin)}</td>
+      <td>${fmtDate(b.checkout)}</td>
+      <td>${nightsBetween(b.checkin,b.checkout)}</td>
+      <td><strong>${fmt$(bookingTotal(b))}</strong></td>
+      <td><span class="tag ${statusColors[b.status]||'tag-gray'}">${b.status}</span></td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  MAINTENANCE
+// ═══════════════════════════════════════════════
+function renderMaintenance() {
+  const open = maintenances.filter(m=>m.status==='Open').length;
+  const inProg = maintenances.filter(m=>m.status==='In Progress').length;
+  const resolved = maintenances.filter(m=>m.status==='Resolved').length;
+  const totalCost = maintenances.reduce((s,m)=>s+(+m.cost||0),0);
+  document.getElementById('maint-stats').innerHTML = `
+    <div class="stat-card amber"><div class="stat-label">Open Issues</div><div class="stat-value">${open}</div><div class="stat-icon">🔧</div></div>
+    <div class="stat-card blue"><div class="stat-label">In Progress</div><div class="stat-value">${inProg}</div><div class="stat-icon">⚙️</div></div>
+    <div class="stat-card green"><div class="stat-label">Resolved</div><div class="stat-value">${resolved}</div><div class="stat-icon">✅</div></div>
+    <div class="stat-card red"><div class="stat-label">Total Cost</div><div class="stat-value">${fmt$(totalCost)}</div><div class="stat-icon">💸</div></div>
+  `;
+  const tbody = document.getElementById('maint-tbody');
+  const sorted = [...maintenances].sort((a,b)=>b.date.localeCompare(a.date));
+  if (!sorted.length) { tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔧</div><p>No maintenance issues logged.</p></div></td></tr>`; return; }
+  tbody.innerHTML = sorted.map(m=>`
+    <tr>
+      <td>${fmtDate(m.date)}</td>
+      <td><strong>${m.issue}</strong></td>
+      <td>${m.category}</td>
+      <td><span class="tag ${priorityColors[m.priority]||'tag-gray'}">${m.priority}</span></td>
+      <td><span class="tag ${maintStatusColors[m.status]||'tag-gray'}">${m.status}</span></td>
+      <td>${m.cost?fmt$(m.cost):'—'}</td>
+      <td>${m.vendor||'—'}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="editMaintenance('${m.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteMaintenance('${m.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  INVENTORY
+// ═══════════════════════════════════════════════
+function renderInventory() {
+  const grid = document.getElementById('inventory-grid');
+  if (!inventory.length) { grid.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><p>No inventory items yet.</p></div>`; return; }
+  grid.innerHTML = inventory.map(i=>{
+    const needsReorder = (+i.qty||0) <= (+i.reorder||0);
+    return `<div class="card">
+      <div class="card-header" style="padding:12px 16px">
+        <h2 style="font-size:14px">${i.name}</h2>
+        ${needsReorder?'<span class="tag tag-red">⚠ Reorder</span>':''}
+      </div>
+      <div class="card-body" style="padding:12px 16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:var(--muted);font-size:12px">Category</span>
+          <span style="font-size:13px">${i.category}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:var(--muted);font-size:12px">Quantity</span>
+          <strong style="font-size:16px">${i.qty}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:var(--muted);font-size:12px">Condition</span>
+          <span class="tag ${conditionColors[i.condition]||'tag-gray'}">${i.condition}</span>
+        </div>
+        ${i.notes?`<p style="font-size:12px;color:var(--muted);margin-top:8px">${i.notes}</p>`:''}
+        <div style="display:flex;gap:6px;margin-top:12px">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editInventory('${i.id}')">✏️ Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteInventory('${i.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  CHECKLISTS
+// ═══════════════════════════════════════════════
+function getDefaultChecklists() {
+  return {
+    cleaning: [
+      'Vacuum all floors and carpets', 'Mop hardwood/tile floors', 'Clean all bathrooms',
+      'Change all bed linens and towels', 'Wipe down kitchen counters and appliances',
+      'Empty and clean refrigerator', 'Take out all trash', 'Wipe mirrors and windows',
+      'Restock toiletries and paper products', 'Check for any damages',
+    ].map((t,i)=>({id:`cl${i}`,text:t,done:false})),
+    checkout: [
+      'Inspect all furniture for damage', 'Check all appliances work', 'Test smoke/CO detectors',
+      'Check outdoor equipment (kayaks, life jackets)', 'Inventory dishes and utensils',
+      'Check for forgotten guest items', 'Document any damage with photos',
+      'Confirm dock/boat is secured', 'Lock all doors and windows', 'Secure outdoor furniture',
+    ].map((t,i)=>({id:`co${i}`,text:t,done:false})),
+    seasonal: [
+      'Inspect dock and pier for winter damage', 'Service lawn mower', 'Check roof and gutters',
+      'Flush water lines (winterize or de-winterize)', 'Inspect HVAC filters',
+      'Test all outdoor lighting', 'Check fire extinguishers', 'Stock firewood',
+      'Inspect boat launch area', 'Clean and store/prepare water toys',
+    ].map((t,i)=>({id:`se${i}`,text:t,done:false})),
+    safety: [
+      'Test all smoke detectors', 'Test carbon monoxide detectors', 'Check fire extinguisher date',
+      'Confirm emergency contact list is posted', 'Verify first aid kit is stocked',
+      'Check life jackets for all sizes', 'Test flashlights and backup power',
+      'Confirm propane levels', 'Verify emergency exit plan is visible', 'Check for trip hazards',
+    ].map((t,i)=>({id:`sa${i}`,text:t,done:false})),
+  };
+}
+
+function renderChecklists() {
+  ['cleaning','checkout','seasonal','safety'].forEach(key => {
+    const el = document.getElementById(`cl-${key}`);
+    if (!checklists[key]) return;
+    el.innerHTML = `<div>${checklists[key].map((item,idx)=>`
+      <div class="checklist-item">
+        <input type="checkbox" id="${key}-${idx}" ${item.done?'checked':''} onchange="toggleCheck('${key}',${idx},this.checked)" />
+        <label for="${key}-${idx}" class="${item.done?'done':''}">${item.text}</label>
+      </div>`).join('')}</div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted)">${checklists[key].filter(i=>i.done).length} / ${checklists[key].length} complete</div>`;
+  });
+}
+
+function toggleCheck(key, idx, val) {
+  checklists[key][idx].done = val;
+  persist();
+  renderChecklists();
+}
+
+function resetChecklist(key) {
+  checklists[key].forEach(i=>i.done=false);
+  persist();
+  renderChecklists();
+}
+
+function addChecklistItem() {
+  const text = prompt('Enter checklist item text:');
+  if (!text) return;
+  const key = prompt('Which list? (cleaning / checkout / seasonal / safety)');
+  if (!checklists[key]) { alert('Invalid list name.'); return; }
+  checklists[key].push({ id: uid(), text, done: false });
+  persist();
+  renderChecklists();
+  showToast('Item added!');
+}
+
+// ═══════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════
+function openModal(name) {
+  if (name === 'booking') populateGuestDropdown();
+  document.getElementById(`modal-${name}`).classList.add('open');
+}
+function closeModal(name) {
+  document.getElementById(`modal-${name}`).classList.remove('open');
+  if (name==='booking') clearBookingForm();
+  if (name==='guest')   clearGuestForm();
+  if (name==='expense') clearExpenseForm();
+  if (name==='maintenance') clearMaintForm();
+  if (name==='inventory') clearInvForm();
+}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click', e => { if (e.target===o) { const name=o.id.replace('modal-',''); closeModal(name); } });
+});
+
+// ─── Booking ───────────────────────────────────
+function populateGuestDropdown() {
+  const sel = document.getElementById('booking-guest');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">-- Select Guest --</option>';
+  guests.forEach(g=>{ const o=document.createElement('option'); o.value=g.id; o.textContent=`${g.fname} ${g.lname}`; sel.appendChild(o); });
+  sel.value = cur;
+}
+
+function clearBookingForm() {
+  ['booking-id','booking-guest','booking-checkin','booking-checkout','booking-rate','booking-deposit','booking-paid','booking-source','booking-notes']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('booking-status').value='Confirmed';
+  document.getElementById('booking-modal-title').textContent='New Reservation';
+}
+
+function saveBooking() {
+  const guestId  = document.getElementById('booking-guest').value;
+  const checkin  = document.getElementById('booking-checkin').value;
+  const checkout = document.getElementById('booking-checkout').value;
+  const rate     = +document.getElementById('booking-rate').value || 0;
+  if (!guestId || !checkin || !checkout) { alert('Please fill in guest, check-in, and check-out.'); return; }
+  if (checkin >= checkout) { alert('Check-out must be after check-in.'); return; }
+  const id = document.getElementById('booking-id').value;
+  const obj = {
+    id: id || uid(), guestId, checkin, checkout, rate,
+    status:  document.getElementById('booking-status').value,
+    deposit: +document.getElementById('booking-deposit').value || 0,
+    paid:    +document.getElementById('booking-paid').value || 0,
+    source:  document.getElementById('booking-source').value,
+    notes:   document.getElementById('booking-notes').value,
+  };
+  if (id) { const i=bookings.findIndex(b=>b.id===id); if(i>-1) bookings[i]=obj; }
+  else bookings.push(obj);
+  persist();
+  closeModal('booking');
+  renderPage(currentPage);
+  showToast(id ? 'Reservation updated!' : 'Reservation added!');
+}
+
+function editBooking(id) {
+  const b = bookings.find(x=>x.id===id); if(!b) return;
+  populateGuestDropdown();
+  document.getElementById('booking-id').value      = b.id;
+  document.getElementById('booking-guest').value   = b.guestId;
+  document.getElementById('booking-checkin').value = b.checkin;
+  document.getElementById('booking-checkout').value= b.checkout;
+  document.getElementById('booking-rate').value    = b.rate;
+  document.getElementById('booking-status').value  = b.status;
+  document.getElementById('booking-deposit').value = b.deposit;
+  document.getElementById('booking-paid').value    = b.paid;
+  document.getElementById('booking-source').value  = b.source||'';
+  document.getElementById('booking-notes').value   = b.notes||'';
+  document.getElementById('booking-modal-title').textContent = 'Edit Reservation';
+  openModal('booking');
+}
+
+function deleteBooking(id) {
+  if (!confirm('Delete this reservation?')) return;
+  bookings = bookings.filter(b=>b.id!==id);
+  persist(); renderPage(currentPage);
+  showToast('Reservation deleted.');
+}
+
+// ─── Guest ─────────────────────────────────────
+function clearGuestForm() {
+  ['guest-id','guest-fname','guest-lname','guest-email','guest-phone','guest-city','guest-state','guest-source','guest-notes']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('guest-modal-title').textContent='Add Guest';
+}
+
+function saveGuest() {
+  const fname = document.getElementById('guest-fname').value.trim();
+  const lname = document.getElementById('guest-lname').value.trim();
+  if (!fname) { alert('First name is required.'); return; }
+  const id = document.getElementById('guest-id').value;
+  const obj = {
+    id: id||uid(), fname, lname,
+    email: document.getElementById('guest-email').value,
+    phone: document.getElementById('guest-phone').value,
+    city:  document.getElementById('guest-city').value,
+    state: document.getElementById('guest-state').value,
+    source:document.getElementById('guest-source').value,
+    notes: document.getElementById('guest-notes').value,
+  };
+  if (id) { const i=guests.findIndex(g=>g.id===id); if(i>-1) guests[i]=obj; }
+  else guests.push(obj);
+  persist(); closeModal('guest'); renderPage(currentPage);
+  showToast(id?'Guest updated!':'Guest added!');
+}
+
+function editGuest(id) {
+  const g=guests.find(x=>x.id===id); if(!g) return;
+  document.getElementById('guest-id').value    = g.id;
+  document.getElementById('guest-fname').value = g.fname;
+  document.getElementById('guest-lname').value = g.lname;
+  document.getElementById('guest-email').value = g.email||'';
+  document.getElementById('guest-phone').value = g.phone||'';
+  document.getElementById('guest-city').value  = g.city||'';
+  document.getElementById('guest-state').value = g.state||'';
+  document.getElementById('guest-source').value= g.source||'';
+  document.getElementById('guest-notes').value = g.notes||'';
+  document.getElementById('guest-modal-title').textContent='Edit Guest';
+  openModal('guest');
+}
+
+function deleteGuest(id) {
+  if (!confirm('Delete this guest? This will not remove their bookings.')) return;
+  guests = guests.filter(g=>g.id!==id);
+  persist(); renderPage(currentPage);
+  showToast('Guest deleted.');
+}
+
+// ─── Expense ───────────────────────────────────
+function clearExpenseForm() {
+  ['expense-id','expense-date','expense-desc','expense-amount','expense-vendor','expense-notes'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('expense-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('expense-modal-title').textContent='Add Expense';
+}
+
+function saveExpense() {
+  const desc   = document.getElementById('expense-desc').value.trim();
+  const amount = +document.getElementById('expense-amount').value;
+  const date   = document.getElementById('expense-date').value;
+  if (!desc || !date) { alert('Description and date are required.'); return; }
+  const id = document.getElementById('expense-id').value;
+  const obj = {
+    id: id||uid(), date, desc, amount,
+    category: document.getElementById('expense-category').value,
+    vendor:   document.getElementById('expense-vendor').value,
+    notes:    document.getElementById('expense-notes').value,
+  };
+  if (id) { const i=expenses.findIndex(e=>e.id===id); if(i>-1) expenses[i]=obj; }
+  else expenses.push(obj);
+  persist(); closeModal('expense'); renderPage(currentPage);
+  showToast(id?'Expense updated!':'Expense added!');
+}
+
+function editExpense(id) {
+  const e=expenses.find(x=>x.id===id); if(!e) return;
+  document.getElementById('expense-id').value       = e.id;
+  document.getElementById('expense-date').value     = e.date;
+  document.getElementById('expense-desc').value     = e.desc;
+  document.getElementById('expense-category').value = e.category;
+  document.getElementById('expense-amount').value   = e.amount;
+  document.getElementById('expense-vendor').value   = e.vendor||'';
+  document.getElementById('expense-notes').value    = e.notes||'';
+  document.getElementById('expense-modal-title').textContent='Edit Expense';
+  openModal('expense');
+}
+
+function deleteExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  expenses = expenses.filter(e=>e.id!==id);
+  persist(); renderPage(currentPage);
+  showToast('Expense deleted.');
+}
+
+// ─── Maintenance ───────────────────────────────
+function clearMaintForm() {
+  ['maint-id','maint-date','maint-issue','maint-cost','maint-vendor','maint-notes'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('maint-date').value='';
+  document.getElementById('maint-priority').value='Medium';
+  document.getElementById('maint-status').value='Open';
+}
+
+function saveMaintenance() {
+  const issue=document.getElementById('maint-issue').value.trim();
+  const date=document.getElementById('maint-date').value;
+  if (!issue||!date) { alert('Issue and date are required.'); return; }
+  const id=document.getElementById('maint-id').value;
+  const obj={
+    id:id||uid(), date, issue,
+    category: document.getElementById('maint-category').value,
+    priority: document.getElementById('maint-priority').value,
+    status:   document.getElementById('maint-status').value,
+    cost:     +document.getElementById('maint-cost').value||0,
+    vendor:   document.getElementById('maint-vendor').value,
+    notes:    document.getElementById('maint-notes').value,
+  };
+  if(id){const i=maintenances.findIndex(m=>m.id===id);if(i>-1)maintenances[i]=obj;}
+  else maintenances.push(obj);
+  persist(); closeModal('maintenance'); renderPage(currentPage);
+  showToast(id?'Issue updated!':'Issue logged!');
+}
+
+function editMaintenance(id) {
+  const m=maintenances.find(x=>x.id===id); if(!m) return;
+  document.getElementById('maint-id').value=m.id;
+  document.getElementById('maint-date').value=m.date;
+  document.getElementById('maint-issue').value=m.issue;
+  document.getElementById('maint-category').value=m.category;
+  document.getElementById('maint-priority').value=m.priority;
+  document.getElementById('maint-status').value=m.status;
+  document.getElementById('maint-cost').value=m.cost||'';
+  document.getElementById('maint-vendor').value=m.vendor||'';
+  document.getElementById('maint-notes').value=m.notes||'';
+  openModal('maintenance');
+}
+
+function deleteMaintenance(id) {
+  if(!confirm('Delete this maintenance record?'))return;
+  maintenances=maintenances.filter(m=>m.id!==id);
+  persist(); renderPage(currentPage);
+  showToast('Record deleted.');
+}
+
+// ─── Inventory ─────────────────────────────────
+function clearInvForm() {
+  ['inv-id','inv-name','inv-qty','inv-reorder','inv-notes'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+}
+
+function saveInventory() {
+  const name=document.getElementById('inv-name').value.trim();
+  if(!name){alert('Name is required.');return;}
+  const id=document.getElementById('inv-id').value;
+  const obj={
+    id:id||uid(), name,
+    category:  document.getElementById('inv-category').value,
+    qty:       +document.getElementById('inv-qty').value||0,
+    condition: document.getElementById('inv-condition').value,
+    reorder:   +document.getElementById('inv-reorder').value||0,
+    notes:     document.getElementById('inv-notes').value,
+  };
+  if(id){const i=inventory.findIndex(x=>x.id===id);if(i>-1)inventory[i]=obj;}
+  else inventory.push(obj);
+  persist(); closeModal('inventory'); renderPage(currentPage);
+  showToast(id?'Item updated!':'Item added!');
+}
+
+function editInventory(id) {
+  const i=inventory.find(x=>x.id===id); if(!i) return;
+  document.getElementById('inv-id').value=i.id;
+  document.getElementById('inv-name').value=i.name;
+  document.getElementById('inv-category').value=i.category;
+  document.getElementById('inv-qty').value=i.qty;
+  document.getElementById('inv-condition').value=i.condition;
+  document.getElementById('inv-reorder').value=i.reorder;
+  document.getElementById('inv-notes').value=i.notes||'';
+  openModal('inventory');
+}
+
+function deleteInventory(id) {
+  if(!confirm('Delete this item?'))return;
+  inventory=inventory.filter(x=>x.id!==id);
+  persist(); renderPage(currentPage);
+  showToast('Item deleted.');
+}
+
+// ─── Quick Add ────────────────────────────────
+function quickAdd() {
+  const map = {
+    dashboard:'booking', calendar:'booking', reservations:'booking',
+    guests:'guest', expenses:'expense', revenue:'booking',
+    property:'maintenance', inventory:'inventory', checklists:null,
+  };
+  const m = map[currentPage];
+  if (m) openModal(m);
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+document.getElementById('expense-date').value = new Date().toISOString().slice(0,10);
+
+// ═══════════════════════════════════════════════
+//  INQUIRIES (from website.html)
+// ═══════════════════════════════════════════════
+function getInquiries() {
+  try { return JSON.parse(localStorage.getItem('llh_inquiries')) || []; } catch { return []; }
+}
+function saveInquiries(arr) { localStorage.setItem('llh_inquiries', JSON.stringify(arr)); }
+
+function renderInquiries() {
+  const inquiries = getInquiries().sort((a,b)=>b.submitted.localeCompare(a.submitted));
+  const newCount  = inquiries.filter(i=>i.status==='New').length;
+  const total     = inquiries.length;
+  document.getElementById('inq-stats').innerHTML = `
+    <div class="stat-card amber"><div class="stat-label">New Inquiries</div><div class="stat-value">${newCount}</div><div class="stat-sub">Needs response</div><div class="stat-icon">📬</div></div>
+    <div class="stat-card blue"> <div class="stat-label">Total Inquiries</div><div class="stat-value">${total}</div><div class="stat-sub">All time</div><div class="stat-icon">📋</div></div>
+    <div class="stat-card green"><div class="stat-label">Converted</div><div class="stat-value">${inquiries.filter(i=>i.status==='Booked').length}</div><div class="stat-sub">Became bookings</div><div class="stat-icon">✅</div></div>
+  `;
+  const tbody = document.getElementById('inq-tbody');
+  if (!inquiries.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📬</div><p>No inquiries yet. Share your <a href="website.html" target="_blank" style="color:var(--blue)">website</a> to start getting booking requests!</p></div></td></tr>`;
+    return;
+  }
+  const inqStatusColors = { New:'tag-amber', Contacted:'tag-blue', Booked:'tag-green', Declined:'tag-red', Expired:'tag-gray' };
+  tbody.innerHTML = inquiries.map(inq=>`
+    <tr>
+      <td style="white-space:nowrap">${new Date(inq.submitted).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+      <td><strong>${inq.fname} ${inq.lname||''}</strong></td>
+      <td><a href="mailto:${inq.email}" style="color:var(--blue)">${inq.email}</a>${inq.phone?`<br><small style="color:var(--muted)">${inq.phone}</small>`:''}</td>
+      <td style="white-space:nowrap">${fmtDate(inq.checkin)} → ${fmtDate(inq.checkout)}</td>
+      <td>${inq.guests||'—'}</td>
+      <td>${inq.source||'—'}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${inq.notes||'—'}</td>
+      <td>
+        <select onchange="updateInqStatus('${inq.id}',this.value)" style="padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;background:var(--light)">
+          ${['New','Contacted','Booked','Declined','Expired'].map(s=>`<option ${s===inq.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-primary btn-sm" onclick="convertInquiry('${inq.id}')" title="Convert to booking">➕ Book</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteInquiry('${inq.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+  updateBadges();
+}
+
+function updateInqStatus(id, status) {
+  const inquiries = getInquiries();
+  const inq = inquiries.find(i=>i.id===id); if(!inq) return;
+  inq.status = status;
+  saveInquiries(inquiries);
+  updateBadges();
+}
+
+function deleteInquiry(id) {
+  if (!confirm('Delete this inquiry?')) return;
+  saveInquiries(getInquiries().filter(i=>i.id!==id));
+  renderInquiries();
+}
+
+function convertInquiry(id) {
+  const inq = getInquiries().find(i=>i.id===id); if(!inq) return;
+  // Check if guest exists, or add them
+  let guest = guests.find(g => g.email && g.email.toLowerCase() === inq.email.toLowerCase());
+  if (!guest) {
+    guest = { id: uid(), fname: inq.fname, lname: inq.lname||'', email: inq.email, phone: inq.phone||'', city:'', state:'', source: inq.source||'Website', notes: '' };
+    guests.push(guest);
+    persist();
+  }
+  // Pre-fill booking modal
+  populateGuestDropdown();
+  document.getElementById('booking-guest').value    = guest.id;
+  document.getElementById('booking-checkin').value  = inq.checkin||'';
+  document.getElementById('booking-checkout').value = inq.checkout||'';
+  document.getElementById('booking-source').value   = inq.source||'Website';
+  document.getElementById('booking-notes').value    = inq.notes||'';
+  document.getElementById('booking-modal-title').textContent = 'New Reservation (from Inquiry)';
+  openModal('booking');
+  // Mark inquiry as Booked
+  updateInqStatus(id, 'Booked');
+  showToast('Guest added — fill in the booking details!');
+}
+
+// ═══════════════════════════════════════════════
+//  DARK MODE
+// ═══════════════════════════════════════════════
+function toggleDark() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('llh_dark', isDark ? '1' : '0');
+  document.getElementById('dark-icon').textContent  = isDark ? '☀️' : '🌙';
+  document.getElementById('dark-label').textContent = isDark ? 'Light' : 'Dark';
+}
+// Restore preference on load
+if (localStorage.getItem('llh_dark') === '1') {
+  document.documentElement.classList.add('dark');
+  document.getElementById('dark-icon').textContent  = '☀️';
+  document.getElementById('dark-label').textContent = 'Light';
+}
+
+seedData();
+renderDashboard();
+updateBadges();
+</script>
+</body>
+</html>
