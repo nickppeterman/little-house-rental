@@ -32,7 +32,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  if (req.body.pin === APP_PIN) {
+  if (req.body.pin.trim() === APP_PIN.trim()) {
     req.session.authenticated = true;
     res.redirect('/app');
   } else {
@@ -115,8 +115,8 @@ function loginPage(error = '') {
     <p>Property Manager — Enter your PIN to continue</p>
     <form method="POST" action="/login">
       <label for="pin">PIN</label>
-      <input type="password" id="pin" name="pin" inputmode="numeric"
-             placeholder="••••" maxlength="8" autofocus required/>
+      <input type="password" id="pin" name="pin"
+             placeholder="••••" autofocus required/>
       <div class="error">${error}</div>
       <button type="submit">Unlock</button>
     </form>
