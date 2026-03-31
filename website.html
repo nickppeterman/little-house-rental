@@ -110,38 +110,75 @@ button { cursor: pointer; font-family: inherit; }
   max-width: 560px; margin: 0 auto 40px;
 }
 
-/* Booking widget */
+/* Booking widget – calendar range picker */
 .hero-widget {
   background: rgba(255,255,255,.12);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,.25);
-  border-radius: 16px;
-  padding: 20px 24px;
-  display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
-  justify-content: center;
-  max-width: 660px; width: 100%;
+  border-radius: 20px;
+  padding: 18px 22px 16px;
+  max-width: 420px; width: 100%;
+  display: flex; flex-direction: column; gap: 0;
+  user-select: none;
 }
-.widget-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
-.widget-field label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.75); letter-spacing: .06em; text-transform: uppercase; }
-.widget-field input {
-  background: rgba(255,255,255,.9);
-  border: none; border-radius: 8px;
-  padding: 10px 13px; font-size: 14px; color: var(--text);
-  outline: none; width: 100%;
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
 }
-.widget-field input:focus { background: #fff; box-shadow: 0 0 0 3px rgba(56,189,248,.35); }
+.cal-nav {
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+  color: #fff; width: 32px; height: 32px; border-radius: 8px;
+  font-size: 18px; cursor: pointer; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.cal-nav:hover { background: rgba(255,255,255,.28); }
+.cal-month-label { color: #fff; font-size: 15px; font-weight: 800; }
+.cal-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  color: rgba(255,255,255,.5); font-size: 10px; font-weight: 700;
+  letter-spacing: .05em; margin-bottom: 3px;
+}
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+.cal-day {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; color: rgba(255,255,255,.9);
+  transition: background .1s; position: relative;
+}
+.cal-day.empty { cursor: default; }
+.cal-day.past { color: rgba(255,255,255,.2); cursor: not-allowed; pointer-events: none; }
+.cal-day:not(.past):not(.empty):not(.start):not(.end):hover { background: rgba(255,255,255,.2); }
+.cal-day.start, .cal-day.end {
+  background: var(--gold); color: #1e293b; font-weight: 900;
+}
+.cal-day.in-range { background: rgba(255,255,255,.13); border-radius: 0; }
+.cal-day.suggested { background: rgba(56,189,248,.22); }
+/* Footer */
+.cal-footer {
+  margin-top: 12px; padding-top: 11px;
+  border-top: 1px solid rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.cal-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.cal-prompt { color: rgba(255,255,255,.75); font-size: 12px; line-height: 1.3; }
+.cal-pricing { display: flex; gap: 10px; align-items: center; }
+.cal-price-item { text-align: center; }
+.cal-price-item .pval { color: #fff; font-size: 16px; font-weight: 900; line-height: 1; }
+.cal-price-item .plbl { color: rgba(255,255,255,.55); font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-top: 2px; }
+.cal-price-sep { color: rgba(255,255,255,.3); font-size: 12px; }
 .widget-btn {
-  background: var(--gold);
-  color: #1e293b;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 26px;
-  font-size: 15px; font-weight: 800;
-  white-space: nowrap;
+  background: var(--gold); color: #1e293b; border: none; border-radius: 10px;
+  padding: 11px 18px; font-size: 13px; font-weight: 800;
+  white-space: nowrap; cursor: pointer; flex-shrink: 0;
   transition: transform .15s, box-shadow .15s;
   box-shadow: 0 4px 16px rgba(245,158,11,.4);
 }
 .widget-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,.5); }
+.widget-btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
 .hero-badges {
   display: flex; gap: 20px; margin-top: 30px; flex-wrap: wrap; justify-content: center;
@@ -444,19 +481,28 @@ section { padding: 80px 24px; }
   <p>A cozy lakefront cottage on the shores of Black River Lake in Monterey, Louisiana. Cast for largemouth bass and crappie, hunt world-class deer and duck on nearby WMAs, or simply disconnect and breathe.</p>
 
   <div class="hero-widget">
-    <div class="widget-field">
-      <label>Check-In</label>
-      <input type="date" id="w-checkin" />
+    <div class="cal-header">
+      <button class="cal-nav" onclick="_CAL.nav(-1)">‹</button>
+      <div class="cal-month-label" id="cal-month-label"></div>
+      <button class="cal-nav" onclick="_CAL.nav(1)">›</button>
     </div>
-    <div class="widget-field">
-      <label>Check-Out</label>
-      <input type="date" id="w-checkout" />
+    <div class="cal-weekdays">
+      <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
     </div>
-    <div class="widget-field" style="max-width:100px">
-      <label>Guests</label>
-      <input type="number" id="w-guests" min="1" max="4" placeholder="2" />
+    <div class="cal-grid" id="cal-grid" onmouseleave="_CAL.hoverEnd()"></div>
+    <div class="cal-footer">
+      <div class="cal-info">
+        <div class="cal-prompt" id="cal-prompt">Select your check-in date</div>
+        <div class="cal-pricing" id="cal-pricing" style="display:none">
+          <div class="cal-price-item"><div class="pval" id="cp-nights">—</div><div class="plbl">Nights</div></div>
+          <div class="cal-price-sep">×</div>
+          <div class="cal-price-item"><div class="pval" id="cp-rate">—</div><div class="plbl">/Night</div></div>
+          <div class="cal-price-sep">=</div>
+          <div class="cal-price-item"><div class="pval" id="cp-total">—</div><div class="plbl">Total Est.</div></div>
+        </div>
+      </div>
+      <button class="widget-btn" id="cal-cta" disabled onclick="checkAvailability()">Check Dates →</button>
     </div>
-    <button class="widget-btn" onclick="checkAvailability()">Check Availability →</button>
   </div>
 
   <div class="hero-badges">
@@ -870,17 +916,127 @@ window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
 });
 
-// ─── Pre-fill hero widget dates ─────────────
-(function() {
-  const today = new Date();
-  const checkin = new Date(today); checkin.setDate(today.getDate() + 14);
-  const checkout = new Date(checkin); checkout.setDate(checkin.getDate() + 3);
+// ─── Calendar Range Picker ───────────────────
+const _CAL = (function() {
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  // Pricing by check-in month (0=Jan … 11=Dec)
+  function rateFor(month) {
+    if ([0,9,10,11].includes(month)) return { rate: 135, min: 3, label: '🦌 Hunting Season' };
+    if ([1,2].includes(month))       return { rate: 110, min: 2, label: '❄️ Off-Season' };
+    return                                  { rate: 150, min: 2, label: '⭐ Peak Season' };
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  let viewYear = today.getFullYear(), viewMonth = today.getMonth();
+  let startDate = null, endDate = null, hoverDate = null;
   const fmt = d => d.toISOString().slice(0,10);
-  document.getElementById('w-checkin').value  = fmt(checkin);
-  document.getElementById('w-checkout').value = fmt(checkout);
-  document.getElementById('w-checkin').min    = fmt(today);
-  document.getElementById('iq-checkin').min   = fmt(today);
+  const sameDay = (a,b) => a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+
+  function suggestEnd(start) {
+    const rule = rateFor(start.getMonth());
+    const wk = new Date(start); wk.setDate(start.getDate() + 7);
+    const mn = new Date(start); mn.setDate(start.getDate() + rule.min);
+    // Prefer 7 nights if no known conflicts, else snap to minimum
+    const avail7 = isAvailable(fmt(start), fmt(wk));
+    return (avail7 !== false) ? wk : mn;
+  }
+
+  function render() {
+    document.getElementById('cal-month-label').textContent = MONTHS[viewMonth] + ' ' + viewYear;
+    const firstDow  = new Date(viewYear, viewMonth, 1).getDay();
+    const totalDays = new Date(viewYear, viewMonth+1, 0).getDate();
+    const activeEnd = endDate || hoverDate;
+    let html = '';
+    for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+    for (let d = 1; d <= totalDays; d++) {
+      const date = new Date(viewYear, viewMonth, d);
+      const isPast  = date < today;
+      const isStart = sameDay(date, startDate);
+      const isEnd   = activeEnd && sameDay(date, activeEnd);
+      let inRange = false, suggested = false;
+      if (startDate && activeEnd) {
+        const lo = startDate < activeEnd ? startDate : activeEnd;
+        const hi = startDate < activeEnd ? activeEnd : startDate;
+        inRange = date > lo && date < hi;
+      } else if (startDate && !endDate && !hoverDate) {
+        const sugEnd = suggestEnd(startDate);
+        if (date > startDate && date <= sugEnd) suggested = true;
+      }
+      let cls = 'cal-day';
+      if (isPast)       cls += ' past';
+      else if (isStart) cls += ' start';
+      else if (isEnd)   cls += ' end';
+      else if (inRange) cls += ' in-range';
+      else if (suggested) cls += ' suggested';
+      const ev = isPast ? '' : `onclick="_CAL.click('${fmt(date)}')" onmouseenter="_CAL.hover('${fmt(date)}')"`;
+      html += `<div class="${cls}" ${ev}>${d}</div>`;
+    }
+    document.getElementById('cal-grid').innerHTML = html;
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const prompt  = document.getElementById('cal-prompt');
+    const pricing = document.getElementById('cal-pricing');
+    const cta     = document.getElementById('cal-cta');
+    if (!startDate) {
+      prompt.textContent = 'Select your check-in date';
+      pricing.style.display = 'none'; cta.disabled = true; return;
+    }
+    const rule = rateFor(startDate.getMonth());
+    if (!endDate) {
+      prompt.textContent = `Now pick check-out · min ${rule.min} nights · ${rule.label}`;
+      pricing.style.display = 'none'; cta.disabled = true; return;
+    }
+    const nights = Math.round((endDate - startDate) / 864e5);
+    const total  = nights * rule.rate;
+    prompt.textContent = rule.label + ' · cleaning & linens included';
+    pricing.style.display = 'flex';
+    document.getElementById('cp-nights').textContent = nights;
+    document.getElementById('cp-rate').textContent   = '$' + rule.rate;
+    document.getElementById('cp-total').textContent  = '$' + total.toLocaleString();
+    cta.disabled = false;
+  }
+
+  return {
+    nav(dir) {
+      viewMonth += dir;
+      if (viewMonth < 0)  { viewMonth = 11; viewYear--; }
+      if (viewMonth > 11) { viewMonth = 0;  viewYear++; }
+      render();
+    },
+    click(dateStr) {
+      const d = new Date(dateStr); d.setHours(0,0,0,0);
+      if (!startDate || endDate) {
+        startDate = d; endDate = suggestEnd(d); hoverDate = null;
+      } else {
+        const rule = rateFor(startDate.getMonth());
+        if (d <= startDate) {
+          startDate = d; endDate = suggestEnd(d);
+        } else {
+          const nights = Math.round((d - startDate) / 864e5);
+          if (nights < rule.min) {
+            endDate = new Date(startDate); endDate.setDate(startDate.getDate() + rule.min);
+          } else { endDate = d; }
+        }
+        hoverDate = null;
+      }
+      render();
+    },
+    hover(dateStr) {
+      if (!startDate || endDate) return;
+      hoverDate = new Date(dateStr); render();
+    },
+    hoverEnd() { if (!endDate) { hoverDate = null; render(); } },
+    getDates() { return { ci: startDate ? fmt(startDate) : '', co: endDate ? fmt(endDate) : '' }; },
+    init() {
+      const d14 = new Date(today); d14.setDate(today.getDate() + 14);
+      viewYear = d14.getFullYear(); viewMonth = d14.getMonth();
+      document.getElementById('iq-checkin').min = fmt(today);
+      render();
+    }
+  };
 })();
+_CAL.init();
 
 // ─── Read bookings from shared localStorage ──
 function getBookings() {
@@ -900,10 +1056,8 @@ function isAvailable(checkin, checkout) {
 
 // ─── Hero widget → open modal with dates ────
 function checkAvailability() {
-  const ci = document.getElementById('w-checkin').value;
-  const co = document.getElementById('w-checkout').value;
-  const g  = document.getElementById('w-guests').value;
-  openInquiry(null, ci, co, g);
+  const { ci, co } = _CAL.getDates();
+  openInquiry(null, ci, co, '2');
 }
 
 // ─── Modal open/close ────────────────────────
