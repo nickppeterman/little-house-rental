@@ -220,26 +220,54 @@ section { padding: 80px 24px; }
 
 /* ─── Gallery ─── */
 #gallery { padding-bottom: 80px; }
-.gallery-intro { margin-bottom: 40px; }
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 240px 240px 220px;
-  gap: 10px;
+.gallery-intro { margin-bottom: 28px; }
+/* Tab bar */
+.gallery-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+.gallery-tab {
+  padding: 9px 22px; border-radius: 30px;
+  font-size: 13px; font-weight: 700;
+  border: 2px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all .2s;
 }
+.gallery-tab.active { background: var(--lake); color: #fff; border-color: var(--lake); }
+.gallery-tab:hover:not(.active) { border-color: var(--lake); color: var(--lake); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+/* Slideshow */
+.slideshow {
+  position: relative; border-radius: 16px; overflow: hidden;
+  height: 520px; background: #0f2942; cursor: pointer;
+}
+.slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
+.slide.active { opacity: 1; }
+.slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slide-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 48px 28px 22px;
+  background: linear-gradient(transparent, rgba(0,0,0,.62));
+  color: #fff; font-size: 15px; font-weight: 700; letter-spacing: .02em;
+}
+.slide-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+  color: #fff; width: 44px; height: 44px; border-radius: 50%;
+  font-size: 22px; cursor: pointer; backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s; z-index: 2; line-height: 1;
+}
+.slide-nav:hover { background: rgba(255,255,255,.3); }
+.slide-nav.prev { left: 16px; }
+.slide-nav.next { right: 16px; }
+.slide-dots { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; z-index: 2; }
+.slide-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: background .2s, transform .2s; }
+.slide-dot.active { background: #fff; transform: scale(1.35); }
+/* Interior grid */
+.interior-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .gallery-cell {
   position: relative; overflow: hidden;
-  border-radius: 10px;
-  cursor: pointer;
-  background: #1e293b;
+  border-radius: 10px; background: #1e293b; height: 240px;
 }
-.gallery-cell:first-child { grid-column: 1 / 3; grid-row: 1 / 3; }
-.gallery-cell img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform .4s ease;
-}
+.gallery-cell img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
 .gallery-cell:hover img { transform: scale(1.04); }
 .gallery-caption {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -247,8 +275,7 @@ section { padding: 80px 24px; }
   background: linear-gradient(transparent, rgba(0,0,0,.55));
   color: #fff; font-size: 12px; font-weight: 700;
   letter-spacing: .04em; text-transform: uppercase;
-  opacity: 0; transition: opacity .3s;
-  border-radius: 0 0 10px 10px;
+  opacity: 0; transition: opacity .3s; border-radius: 0 0 10px 10px;
 }
 .gallery-cell:hover .gallery-caption { opacity: 1; }
 
@@ -442,15 +469,15 @@ section { padding: 80px 24px; }
   #nav { padding: 0 20px; }
   .nav-links { display: none; }
   .location-grid { grid-template-columns: 1fr; }
-  .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px 200px; }
-  .gallery-cell:first-child { grid-column: 1 / 3; grid-row: auto; height: 220px; }
+  .slideshow { height: 340px; }
+  .interior-grid { grid-template-columns: 1fr 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .footer-brand { grid-column: 1 / 3; }
   .fr { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-  .gallery-grid { grid-template-columns: 1fr; grid-template-rows: repeat(6, 220px); }
-  .gallery-cell:first-child { grid-column: auto; height: auto; }
+  .slideshow { height: 280px; }
+  .interior-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-brand { grid-column: auto; }
 }
@@ -567,34 +594,65 @@ section { padding: 80px 24px; }
       <div class="section-label">Photo gallery</div>
       <div class="section-title">See the beauty for yourself</div>
     </div>
-    <div class="gallery-grid">
-      <!-- Large: Boat house & lake — spans 2 cols × 2 rows -->
-      <div class="gallery-cell">
-        <img src="Pics/029B135F-336E-4B06-A209-474AC6ACADC0_4_5005_c.jpeg" alt="Boat house on Black River Lake" />
-        <div class="gallery-caption">🚤 Boat House — Black River Lake</div>
+
+    <!-- Tab buttons -->
+    <div class="gallery-tabs">
+      <button class="gallery-tab active" onclick="switchGalleryTab('lake')">🌊 Lake Views</button>
+      <button class="gallery-tab" onclick="switchGalleryTab('interior')">🏡 Interior</button>
+    </div>
+
+    <!-- Lake Views — Slideshow -->
+    <div class="tab-panel active" id="tab-lake">
+      <div class="slideshow">
+        <div class="slide active">
+          <img src="Pics/9AC13A31-7BB6-415A-9316-80F93A24BF3F_1_105_c.jpeg" alt="Fiery sunset sky over Black River Lake" />
+          <div class="slide-caption">🌅 Sunset Sky — Black River Lake</div>
+        </div>
+        <div class="slide">
+          <img src="Pics/00ECC846-AECA-4253-A9C5-A620D4DF3B2F_1_105_c.jpeg" alt="Dramatic sunset and dock reflection" />
+          <div class="slide-caption">🔥 Golden Sunset from the Dock</div>
+        </div>
+        <div class="slide">
+          <img src="Pics/29B90EFE-6AD4-49C8-BD06-ED59C2AC626B_1_102_o.jpeg" alt="Crescent moon rising over the lake at dusk" />
+          <div class="slide-caption">🌙 Crescent Moon over the Lake</div>
+        </div>
+        <div class="slide">
+          <img src="Pics/69CE76F1-9A9D-4D64-B2D4-101F67C1B969_1_105_c.jpeg" alt="Golden hour on the water" />
+          <div class="slide-caption">✨ Golden Hour on the Water</div>
+        </div>
+        <div class="slide">
+          <img src="Pics/029B135F-336E-4B06-A209-474AC6ACADC0_4_5005_c.jpeg" alt="Private boat house on Black River Lake" />
+          <div class="slide-caption">🚤 Your Private Boat House</div>
+        </div>
+        <button class="slide-nav prev" onclick="slideshowNav(-1)">‹</button>
+        <button class="slide-nav next" onclick="slideshowNav(1)">›</button>
+        <div class="slide-dots" id="slide-dots"></div>
       </div>
-      <!-- Top right: fiery sunset with dock -->
-      <div class="gallery-cell">
-        <img src="Pics/00ECC846-AECA-4253-A9C5-A620D4DF3B2F_1_105_c.jpeg" alt="Stunning sunset over Black River Lake" />
-        <div class="gallery-caption">🌅 Sunset from the Dock</div>
-      </div>
-      <!-- Mid right: crescent moon twilight -->
-      <div class="gallery-cell">
-        <img src="Pics/29B90EFE-6AD4-49C8-BD06-ED59C2AC626B_1_102_o.jpeg" alt="Crescent moon rising over the lake at dusk" />
-        <div class="gallery-caption">🌙 Crescent Moon over the Lake</div>
-      </div>
-      <!-- Bottom row: interiors -->
-      <div class="gallery-cell">
-        <img src="Pics/B350A60B-6A31-448F-A569-DA5597730B19_1_102_o.jpeg" alt="Open-plan living room with loft above" style="object-position: center top;" />
-        <div class="gallery-caption">🛋️ Living Room & Loft</div>
-      </div>
-      <div class="gallery-cell">
-        <img src="Pics/75ED93F0-C49A-4427-912A-DF249971AF7B_1_102_o.jpeg" alt="Modern kitchen with loft staircase" />
-        <div class="gallery-caption">🍳 Kitchen + Loft Stairs</div>
-      </div>
-      <div class="gallery-cell">
-        <img src="Pics/69CE76F1-9A9D-4D64-B2D4-101F67C1B969_1_105_c.jpeg" alt="Golden sunset view from the property" />
-        <div class="gallery-caption">🌅 Golden Hour on the Water</div>
+    </div>
+
+    <!-- Interior — Grid -->
+    <div class="tab-panel" id="tab-interior">
+      <div class="interior-grid">
+        <div class="gallery-cell">
+          <img src="Pics/B350A60B-6A31-448F-A569-DA5597730B19_1_102_o.jpeg" alt="Open-plan living room with loft above" style="object-position: center top;" />
+          <div class="gallery-caption">🛋️ Living Room & Loft</div>
+        </div>
+        <div class="gallery-cell">
+          <img src="Pics/75ED93F0-C49A-4427-912A-DF249971AF7B_1_102_o.jpeg" alt="Modern kitchen with loft staircase" />
+          <div class="gallery-caption">🍳 Kitchen + Loft Stairs</div>
+        </div>
+        <div class="gallery-cell">
+          <img src="Pics/A75E8389-CB95-4213-8DCE-ABC182D5354D_1_102_o.jpeg" alt="Clean bathroom with washer and dryer" />
+          <div class="gallery-caption">🚿 Bathroom & Laundry</div>
+        </div>
+        <div class="gallery-cell">
+          <img src="Pics/C647824C-C83E-4725-9D5A-708B6FA2E0BE_1_102_o.jpeg" alt="Bedroom area with sliding barn door" />
+          <div class="gallery-caption">🚪 Bedroom Suite</div>
+        </div>
+        <div class="gallery-cell">
+          <img src="Pics/FEE5B6B3-94FD-4526-9021-AA548CD904E3_1_102_o.jpeg" alt="Bedroom with wall-mounted TV" />
+          <div class="gallery-caption">📺 Bedroom with TV</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1106,6 +1164,44 @@ function runAvailCheck() {
     procBtn.style.display = 'none';
   }
 }
+
+// ─── Gallery tabs ────────────────────────────
+function switchGalleryTab(tab) {
+  document.querySelectorAll('.gallery-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', (tab === 'lake' && i === 0) || (tab === 'interior' && i === 1));
+  });
+  document.getElementById('tab-lake').classList.toggle('active', tab === 'lake');
+  document.getElementById('tab-interior').classList.toggle('active', tab === 'interior');
+}
+
+// ─── Slideshow ───────────────────────────────
+(function() {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsEl  = document.getElementById('slide-dots');
+  let current = 0, timer;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(dot);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    resetTimer();
+  }
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => goTo(current + 1), 5000);
+  }
+  window.slideshowNav = dir => goTo(current + dir);
+  resetTimer();
+})();
 
 // ─── Show inquiry form ───────────────────────
 function showInquiryForm() {
